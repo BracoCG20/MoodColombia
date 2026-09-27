@@ -1,0 +1,547 @@
+@use "../../styles/variables" as *;
+@use "../../styles/breakpoints" as *;
+
+.timeline {
+	position: relative;
+	background-color: #549aa7;
+	width: 100%;
+	overflow-x: clip;
+	z-index: 1000;
+
+	/* =========================================
+     GESTIÓN DE DISPLAY EXCLUSIVO
+     ========================================= */
+	&__mobile-only {
+		display: block;
+		@media (min-width: 1024px) {
+			display: none !important;
+		}
+	}
+
+	&__desktop-only {
+		display: none;
+		@media (min-width: 1024px) {
+			display: block !important;
+		}
+	}
+
+	/* =========================================
+     FONDOS COMUNES
+     ========================================= */
+	&__grid-bg {
+		position: absolute;
+		inset: 0;
+		background-image: url("/timeline/fondo_cuadricula.webp");
+		background-size: cover;
+		background-position: center;
+		background-repeat: repeat;
+		z-index: 1;
+	}
+	&__grid-bg2 {
+		position: absolute;
+		inset: 0;
+		background-image: url("/timeline/fondo_timeline.webp");
+		background-size: cover;
+		background-position: center;
+		background-repeat: repeat;
+		z-index: 2;
+	}
+}
+
+/* =========================================
+   ESTILOS MOBILE / TABLET (Optimizados para Rendimiento)
+   ========================================= */
+.timeline-mobile {
+	&__sticky-scene {
+		position: sticky;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100vh;
+		overflow: hidden;
+		z-index: 1;
+	}
+	&__intro-texts {
+		position: absolute;
+		inset: 0;
+		z-index: 5;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+		padding: 3rem 3.5rem;
+		pointer-events: none;
+		@include tablet {
+			padding: 4rem 6rem;
+		}
+	}
+	&__intro-text {
+		color: $white;
+		text-align: center;
+		font-family: $font-primary;
+		font-size: clamp(1.2rem, 2vw, 1.5rem);
+		max-width: 800px;
+		line-height: 1.2;
+		&--bottom {
+			text-transform: uppercase;
+			font-family: $font-secondary;
+			font-size: clamp(1.5rem, 3vw, 2rem);
+		}
+	}
+	&__mood-letters {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 2px;
+		padding: 10vh 0;
+		will-change: transform, filter, opacity;
+		transform: translateZ(0);
+		backface-visibility: hidden;
+		perspective: 1000px;
+		transform-style: preserve-3d;
+	}
+	&__letter {
+		height: 19%;
+		width: auto;
+		object-fit: contain;
+		transform: translateZ(0);
+		backface-visibility: hidden;
+	}
+	&__figures {
+		position: absolute;
+		inset: 0;
+		z-index: 3;
+		pointer-events: none;
+	}
+	&__figure {
+		position: absolute;
+		will-change: transform;
+		filter: blur(1px);
+		transform: translateZ(0);
+		backface-visibility: hidden;
+		perspective: 1000px;
+
+		&--1 {
+			top: 18%;
+			right: -10%;
+			width: 35%;
+			max-width: 150px;
+		}
+		&--2 {
+			top: 32%;
+			left: -12%;
+			width: 45%;
+			max-width: 250px;
+		}
+		&--3 {
+			bottom: 25%;
+			right: -4%;
+			width: 40%;
+			max-width: 200px;
+		}
+	}
+	&__whats-your {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 50%;
+		max-width: 400px;
+		object-fit: contain;
+		filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.25));
+		z-index: 6;
+		backface-visibility: hidden;
+
+		@include tablet {
+			max-width: 700px;
+		}
+	}
+	&__scroll-track {
+		position: relative;
+		width: 100%;
+		z-index: 10;
+	}
+	&__spacer {
+		height: 100vh;
+		width: 100%;
+	}
+	&__content {
+		position: relative;
+		width: 100%;
+		max-width: 1200px;
+		margin: 0 auto;
+		padding-bottom: 6rem;
+	}
+	&__center-line {
+		position: absolute;
+		left: 50%;
+		transform: translateX(-50%);
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background-color: rgba($white, 0.2);
+		z-index: 1;
+	}
+	&__center-line-progress {
+		width: 100%;
+		height: 100%;
+		background-color: $black;
+		transform: scaleY(0);
+		transform-origin: top center;
+		will-change: transform;
+	}
+	&__items {
+		display: flex;
+		flex-direction: column;
+		gap: 4rem;
+		width: 100%;
+		padding: 0;
+	}
+}
+
+/* =========================================
+   ESTILOS DESKTOP (Intactos)
+   ========================================= */
+.timeline-desktop {
+	&__sticky-scene {
+		position: sticky;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100vh;
+		overflow: hidden;
+		z-index: 1;
+	}
+	&__intro-texts {
+		position: absolute;
+		inset: 0;
+		z-index: 5;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
+		padding: 4rem 6rem;
+		pointer-events: none;
+	}
+	&__intro-text {
+		color: $white;
+		text-align: center;
+		font-family: $font-primary;
+		font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+		max-width: 700px;
+		line-height: 1.2;
+		&--bottom {
+			text-transform: uppercase;
+			font-family: $font-secondary;
+			font-size: clamp(1.5rem, 4vw, 2.5rem);
+			max-width: 500px;
+		}
+	}
+	&__mood-letters {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		gap: 0.2rem;
+		padding: 0 5vw;
+		will-change: transform, filter, opacity;
+		z-index: 100;
+	}
+	&__letter {
+		height: 20%;
+		width: auto;
+		object-fit: contain;
+	}
+	&__figures {
+		position: absolute;
+		inset: 0;
+		z-index: 3;
+		pointer-events: none;
+	}
+	&__figure {
+		position: absolute;
+		will-change: transform;
+		filter: blur(1px);
+		&--1 {
+			top: 5%;
+			right: 0%;
+			width: 30%;
+			max-width: 200px;
+		}
+		&--2 {
+			top: 20%;
+			left: -20%;
+			width: 50%;
+			max-width: 600px;
+		}
+		&--3 {
+			bottom: -5%;
+			right: -10%;
+			width: 50%;
+			max-width: 350px;
+		}
+	}
+	&__whats-your {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 50%;
+		max-width: 450px;
+		object-fit: contain;
+		filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.25));
+		z-index: 101;
+	}
+	&__scroll-track {
+		position: relative;
+		width: 100%;
+		z-index: 10;
+	}
+	&__spacer {
+		height: 50vh;
+		width: 100%;
+	}
+
+	&__content {
+		position: relative;
+		width: 100%;
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		overflow: hidden;
+	}
+
+	&__items {
+		display: flex;
+		flex-direction: row;
+		width: max-content;
+		height: 0;
+		align-items: center;
+		gap: 0;
+		padding-left: 100vw;
+		padding-right: 50vw;
+		position: relative;
+	}
+
+	&__center-line {
+		position: absolute;
+		left: 100vw;
+		right: 50vw;
+		top: 0;
+		transform: translateY(-50%);
+		height: 2px;
+		background-color: rgba($white, 0.2);
+		z-index: 1;
+	}
+	&__center-line-progress {
+		width: 100%;
+		height: 100%;
+		background-color: $black;
+		transform: scaleX(0);
+		transform-origin: left center;
+		will-change: transform;
+	}
+}
+
+/* =========================================
+   GEOMETRÍA AISLADA DE LOS ITEMS
+   ========================================= */
+.timeline-item {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	z-index: 2;
+
+	&__circuit {
+		position: absolute;
+		display: flex;
+		align-items: center;
+	}
+	&__circuit-node {
+		position: absolute;
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background-color: #f4e26a;
+		border: 2px solid #000000;
+		margin: auto;
+		z-index: 2;
+	}
+	&__content-wrapper {
+		width: 100%;
+		will-change: transform, opacity;
+	}
+	&__content {
+		display: flex;
+		flex-direction: column;
+		background: rgba(2, 2, 2, 0.15);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 16px;
+		box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+		@include tablet {
+			text-align: start;
+		}
+	}
+	&__number {
+		font-family: $font-primary;
+		color: $black;
+		line-height: 1;
+	}
+	&__title {
+		font-family: $font-secondary;
+		font-weight: 700;
+		color: $white;
+		text-transform: uppercase;
+	}
+	&__description {
+		font-family: $font-primary;
+		line-height: 1.1;
+		color: $white;
+		margin: 0;
+	}
+
+	// ------------------------------------
+	// CONTEXTO: MOBILE / TABLET
+	// ------------------------------------
+	&--mobile {
+		width: 50%;
+		.timeline-item__circuit {
+			top: 2rem;
+			width: 0;
+			height: 12px;
+		}
+		.timeline-item__circuit-node {
+			top: 0;
+			bottom: 0;
+		}
+		.timeline-item__content {
+			padding: 1rem 0.8rem;
+			@include tablet {
+				padding: 1.5rem;
+			}
+		}
+		.timeline-item__number {
+			font-size: clamp(2rem, 4vw, 3.5rem);
+		}
+		.timeline-item__title {
+			font-size: clamp(1.2rem, 3vw, 2rem);
+		}
+		.timeline-item__description {
+			font-size: clamp(0.85rem, 1.5vw, 1rem);
+		}
+	}
+	&--mobile-left {
+		align-self: flex-start;
+		text-align: right;
+		padding: 0rem 0.5rem;
+		@include tablet {
+			padding-right: 3rem;
+		}
+		.timeline-item__circuit {
+			right: 0;
+		}
+		.timeline-item__circuit-node {
+			right: -6px;
+		}
+		.timeline-item__content-wrapper {
+			align-items: flex-end;
+		}
+	}
+	&--mobile-right {
+		align-self: flex-end;
+		text-align: left;
+		padding: 0rem 0.5rem;
+		@include tablet {
+			padding-left: 3rem;
+		}
+		.timeline-item__circuit {
+			left: 0;
+		}
+		.timeline-item__circuit-node {
+			left: -6px;
+		}
+		.timeline-item__content-wrapper {
+			align-items: flex-start;
+		}
+	}
+
+	// ------------------------------------
+	// CONTEXTO: DESKTOP
+	// ------------------------------------
+	&--desktop {
+		width: 500px;
+		height: 0;
+		flex-shrink: 0;
+		justify-content: center;
+		align-items: center;
+		.timeline-item__circuit {
+			top: auto;
+			width: 0;
+			height: 0;
+			background: transparent;
+		}
+		.timeline-item__circuit-node {
+			transform: translateX(-50%);
+		}
+		.timeline-item__content-wrapper {
+			position: absolute;
+			display: flex;
+			flex-direction: column;
+		}
+		.timeline-item__content {
+			padding: 1.5rem;
+			width: 100%;
+		}
+		.timeline-item__number {
+			font-size: 4rem;
+		}
+		.timeline-item__title {
+			font-size: 2.5rem;
+		}
+		.timeline-item__description {
+			font-size: 1.1rem;
+			line-height: 1.2;
+		}
+	}
+	&--desktop-left {
+		text-align: center;
+		padding: 0;
+		.timeline-item__circuit {
+			left: 50%;
+		}
+		.timeline-item__circuit-node {
+			top: -6px;
+			left: 50%;
+		}
+		.timeline-item__content-wrapper {
+			top: 2rem;
+			padding-top: 0;
+			align-items: center;
+		}
+	}
+	&--desktop-right {
+		text-align: center;
+		padding: 0;
+		.timeline-item__circuit {
+			left: 50%;
+		}
+		.timeline-item__circuit-node {
+			top: -6px;
+			left: 50%;
+		}
+		.timeline-item__content-wrapper {
+			bottom: 2rem;
+			padding-bottom: 0;
+			align-items: center;
+		}
+	}
+}

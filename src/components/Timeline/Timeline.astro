@@ -1,0 +1,302 @@
+---
+import { useTranslations, type Lang } from '../../i18n/utils';
+import TimelineItem from './TimelineItem.astro';
+import './Timeline.scss';
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+
+// Tipado estricto para extraer la data
+interface TimelineData {
+  number: string;
+  title: string;
+  description: string;
+}
+
+const introTop = t('timeline.intro.topText') as string;
+const introBottom = t('timeline.intro.bottomText') as string;
+const items = t('timeline.items') as readonly TimelineData[];
+---
+
+<section class='timeline' id='timeline'>
+  <!-- ======================================================= -->
+  <!-- VERSIÓN MOBILE / TABLET (< 1024px)                      -->
+  <!-- ======================================================= -->
+  <div class='timeline__mobile-only'>
+    <div class='timeline-mobile__sticky-scene'>
+      <!-- Añadimos data-parallax para el efecto inmersivo extra -->
+      <div class='timeline__grid-bg' data-parallax-bg></div>
+      <div class='timeline__grid-bg2' data-parallax-bg></div>
+      
+      <div class='timeline-mobile__intro-texts' data-intro-text='mobile'>
+        <p class='timeline-mobile__intro-text timeline-mobile__intro-text--top' set:html={introTop} />
+        <p class='timeline-mobile__intro-text timeline-mobile__intro-text--bottom' set:html={introBottom} />
+      </div>
+
+      <div class='timeline-mobile__mood-letters' data-mood-block='mobile'>
+        <img src='/timeline/M.webp' alt='Letra M' class='timeline-mobile__letter' loading="lazy" />
+        <img src='/timeline/O.webp' alt='Letra O' class='timeline-mobile__letter' loading="lazy" />
+        <img src='/timeline/O.webp' alt='Letra O' class='timeline-mobile__letter' loading="lazy" />
+        <img src='/timeline/D.webp' alt='Letra D' class='timeline-mobile__letter' loading="lazy" />
+      </div>
+
+      <div class='timeline-mobile__figures'>
+        <img src='/timeline/figura_1.webp' alt='Figura abstracta 1' class='timeline-mobile__figure timeline-mobile__figure--1' data-figure='mobile' loading="lazy" />
+        <img src='/timeline/figura_2.webp' alt='Figura abstracta 2' class='timeline-mobile__figure timeline-mobile__figure--2' data-figure='mobile' loading="lazy" />
+        <img src='/timeline/figura_3.webp' alt='Figura abstracta 3' class='timeline-mobile__figure timeline-mobile__figure--3' data-figure='mobile' loading="lazy" />
+      </div>
+
+      <img src='/timeline/letra_timeline.webp' alt="What's your mood" class='timeline-mobile__whats-your' loading="lazy" />
+    </div>
+
+    <div class='timeline-mobile__scroll-track'>
+      <div class='timeline-mobile__content'>
+        <div class='timeline-mobile__center-line'>
+          <div class='timeline-mobile__center-line-progress' data-line-progress='mobile'></div>
+        </div>
+
+        <div class='timeline-mobile__items'>
+          {
+            items.map((item, index) => (
+              <TimelineItem
+                number={item.number}
+                title={item.title}
+                description={item.description}
+                align={index % 2 === 0 ? 'left' : 'right'}
+                context='mobile'
+              />
+            ))
+          }
+        </div>
+      </div>
+      <div class='timeline-mobile__spacer' data-outro-spacer='mobile'></div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- VERSIÓN DESKTOP (>= 1024px)                             -->
+  <!-- ======================================================= -->
+  <div class='timeline__desktop-only'>
+    <div class='timeline-desktop__sticky-scene'>
+      <div class='timeline__grid-bg' data-parallax-bg></div>
+      <div class='timeline__grid-bg2' data-parallax-bg></div>
+      
+      <div class='timeline-desktop__intro-texts' data-intro-text='desktop'>
+        <p class='timeline-desktop__intro-text timeline-desktop__intro-text--top' set:html={introTop} />
+        <p class='timeline-desktop__intro-text timeline-desktop__intro-text--bottom' set:html={introBottom} />
+      </div>
+
+      <div class='timeline-desktop__mood-letters' data-mood-block='desktop'>
+        <img src='/timeline/M.webp' alt='Letra M' class='timeline-desktop__letter' loading="lazy" />
+        <img src='/timeline/O.webp' alt='Letra O' class='timeline-desktop__letter' loading="lazy" />
+        <img src='/timeline/O.webp' alt='Letra O' class='timeline-desktop__letter' loading="lazy" />
+        <img src='/timeline/D.webp' alt='Letra D' class='timeline-desktop__letter' loading="lazy" />
+      </div>
+
+      <div class='timeline-desktop__figures'>
+        <img src='/timeline/figura_1.webp' alt='Figura abstracta 1' class='timeline-desktop__figure timeline-desktop__figure--1' data-figure='desktop' loading="lazy" />
+        <img src='/timeline/figura_2.webp' alt='Figura abstracta 2' class='timeline-desktop__figure timeline-desktop__figure--2' data-figure='desktop' loading="lazy" />
+        <img src='/timeline/figura_3.webp' alt='Figura abstracta 3' class='timeline-desktop__figure timeline-desktop__figure--3' data-figure='desktop' loading="lazy" />
+      </div>
+
+      <img src='/timeline/letra_timeline2.webp' alt="What's your mood" class='timeline-desktop__whats-your' loading="lazy" />
+    </div>
+
+    <div class='timeline-desktop__scroll-track'>
+      <div class='timeline-desktop__content'>
+        <div class='timeline-desktop__items'>
+          <div class='timeline-desktop__center-line'>
+            <div class='timeline-desktop__center-line-progress' data-line-progress='desktop'></div>
+          </div>
+          {
+            items.map((item, index) => (
+              <TimelineItem
+                number={item.number}
+                title={item.title}
+                description={item.description}
+                align={index % 2 === 0 ? 'left' : 'right'}
+                context='desktop'
+              />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let currentMM: gsap.MatchMedia | null = null;
+
+  function initTimelineAnimations() {
+    ScrollTrigger.getAll().forEach((st) => {
+      if (typeof st.vars.id === 'string' && st.vars.id.startsWith('timeline-')) {
+        st.kill();
+      }
+    });
+    currentMM?.revert();
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mm = gsap.matchMedia();
+    currentMM = mm;
+
+    // // Efecto inmersivo de Parallax al fondo (Compartido para Desktop y Mobile)
+    // const backgrounds = document.querySelectorAll('[data-parallax-bg]');
+    // if (backgrounds.length > 0 && !prefersReducedMotion) {
+    //   gsap.to(backgrounds, {
+    //     yPercent: 15,
+    //     ease: 'none',
+    //     scrollTrigger: {
+    //       trigger: '.timeline',
+    //       start: 'top bottom',
+    //       end: 'bottom top',
+    //       scrub: true,
+    //     }
+    //   });
+    // }
+
+    // =======================================================
+    // CONTEXTO MOBILE / TABLET (< 1024px)
+    // =======================================================
+    mm.add('(max-width: 1023px)', () => {
+      const items = gsap.utils.toArray<HTMLElement>('[data-timeline-item="mobile"]');
+      const lineProgress = document.querySelector('[data-line-progress="mobile"]');
+
+      if (prefersReducedMotion) {
+        gsap.set(lineProgress, { scaleY: 1 });
+        items.forEach((item) => {
+          gsap.set(item.querySelector('.timeline-item__content-wrapper'), { opacity: 1, y: 0, scale: 1 });
+          gsap.set(item.querySelector('[data-circuit-node]'), { scale: 1 });
+        });
+        return;
+      }
+
+      const introTl = gsap.timeline({
+        scrollTrigger: {
+          id: 'timeline-mobile-intro',
+          trigger: '.timeline__mobile-only',
+          start: 'top top',
+          end: '+=70vh',
+          scrub: 0.6,
+        },
+      });
+
+      introTl.to('[data-intro-text="mobile"]', { opacity: 0, y: -10, duration: 1, autoRound: false }, 0);
+      introTl.to('[data-mood-block="mobile"]', { scale: 1.4, filter: 'blur(6px)', opacity: 0.4, duration: 2, force3D: true, rotationZ: 0.01, autoRound: false, ease: 'power1.inOut' }, 0);
+      introTl.to('[data-figure="mobile"]', {
+        y: (i: number, el: HTMLElement) => el.classList.contains('timeline-mobile__figure--1') ? -40 : 40,
+        filter: 'blur(2px)', duration: 2, force3D: true, rotationZ: 0.01, autoRound: false, ease: 'power1.inOut'
+      }, 0);
+
+      gsap.set(lineProgress, { scaleY: 0, transformOrigin: 'top center' });
+      gsap.to(lineProgress, {
+        scaleY: 1, ease: 'none',
+        scrollTrigger: {
+          id: 'timeline-mobile-line', trigger: '.timeline-mobile__content',
+          start: 'top 85%', end: 'bottom 85%', scrub: 0.4,
+        },
+      });
+
+      items.forEach((item, i) => {
+        const node = item.querySelector('[data-circuit-node]');
+        const wrapper = item.querySelector('.timeline-item__content-wrapper');
+        gsap.set(node, { scale: 0 });
+        gsap.set(wrapper, { opacity: 0, y: 30, scale: 0.55 });
+
+        gsap.timeline({
+          scrollTrigger: {
+            id: `timeline-mobile-item-${i}`, trigger: item, start: 'top 90%', toggleActions: 'play none none reverse',
+          },
+        })
+        .to(wrapper, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: 'power2.out', force3D: true, autoRound: false })
+        .to(node, { scale: 1, duration: 0.35, ease: 'back.out(2)' }, '-=0.3');
+      });
+
+      const outroTl = gsap.timeline({
+        scrollTrigger: {
+          id: 'timeline-mobile-outro', trigger: '[data-outro-spacer="mobile"]', start: 'top bottom', end: 'bottom bottom', scrub: 1,
+        },
+      });
+      outroTl.to('[data-intro-text="mobile"]', { opacity: 1, y: 0, duration: 1, autoRound: false }, 0);
+      outroTl.to('[data-mood-block="mobile"]', { scale: 1, filter: 'blur(0px)', opacity: 1, duration: 2, force3D: true, rotationZ: 0.01, autoRound: false, ease: 'power1.inOut' }, 0);
+      outroTl.to('[data-figure="mobile"]', { y: 0, filter: 'blur(0px)', duration: 2, force3D: true, rotationZ: 0.01, autoRound: false, ease: 'power1.inOut' }, 0);
+    });
+
+    // =======================================================
+    // CONTEXTO DESKTOP (>= 1024px)
+    // =======================================================
+    mm.add('(min-width: 1024px)', () => {
+      const sectionDesktop = document.querySelector('.timeline__desktop-only');
+      const scrollTrack = document.querySelector('.timeline-desktop__scroll-track');
+      const itemsContainer = document.querySelector('.timeline-desktop__items');
+      const items = gsap.utils.toArray<HTMLElement>('[data-timeline-item="desktop"]');
+      const lineProgress = document.querySelector('[data-line-progress="desktop"]');
+
+      if (prefersReducedMotion) {
+        gsap.set(lineProgress, { scaleX: 1 });
+        items.forEach((item) => {
+          gsap.set(item.querySelector('.timeline-item__content-wrapper'), { opacity: 1, x: 0, scale: 1 });
+          gsap.set(item.querySelector('[data-circuit-node]'), { scale: 1 });
+        });
+        return;
+      }
+
+      gsap.set(sectionDesktop, { position: 'relative' });
+      gsap.set(scrollTrack, { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 10 });
+      gsap.set(itemsContainer, { x: () => window.innerWidth });
+
+      const getScrollAmount = () => (itemsContainer as HTMLElement).scrollWidth;
+
+      const masterTl = gsap.timeline({
+        scrollTrigger: {
+          id: 'timeline-desktop-master', trigger: sectionDesktop, pin: true, start: 'top top', end: () => `+=${getScrollAmount() + window.innerWidth * 1.5}`, scrub: 1, invalidateOnRefresh: true,
+        },
+      });
+
+      masterTl.addLabel('intro');
+      masterTl.to('[data-intro-text="desktop"]', { opacity: 0, y: -10, duration: 0.5, autoRound: false }, 'intro');
+      masterTl.to('[data-mood-block="desktop"]', { scale: 1.4, filter: 'blur(6px)', opacity: 0.4, duration: 2, ease: 'power1.inOut' }, 'intro');
+      masterTl.to('[data-figure="desktop"]', { x: (i, el) => el.classList.contains('timeline-desktop__figure--1') ? -40 : 40, filter: 'blur(2px)', duration: 2, ease: 'power1.inOut' }, 'intro');
+
+      masterTl.addLabel('scroll', 'intro+=1');
+
+      const horizontalScrollTween = gsap.to(itemsContainer, { x: () => -getScrollAmount(), ease: 'none', duration: 5 });
+      masterTl.add(horizontalScrollTween, 'scroll');
+
+      gsap.set(lineProgress, { scaleX: 0, transformOrigin: 'left center' });
+      masterTl.to(lineProgress, { scaleX: 1, ease: 'none', duration: 4 }, 'scroll');
+
+      masterTl.addLabel('outro', 'scroll+=4.5');
+      masterTl.to('[data-intro-text="desktop"]', { opacity: 1, y: 0, duration: 0.5 }, 'outro');
+      masterTl.to('[data-mood-block="desktop"]', { scale: 1, filter: 'blur(0px)', opacity: 1, duration: 2, ease: 'power1.inOut' }, 'outro');
+      masterTl.to('[data-figure="desktop"]', { x: 0, filter: 'blur(0px)', duration: 2, ease: 'power1.inOut' }, 'outro');
+
+      items.forEach((item, i) => {
+        const node = item.querySelector('[data-circuit-node]');
+        const wrapper = item.querySelector('.timeline-item__content-wrapper');
+        gsap.set(node, { scale: 0 });
+        gsap.set(wrapper, { opacity: 0, x: 60, scale: 0.85 });
+
+        gsap.timeline({
+          scrollTrigger: {
+            id: `timeline-desktop-item-${i}`, trigger: item, containerAnimation: horizontalScrollTween, start: 'left 85%', toggleActions: 'play none none reverse',
+          },
+        })
+        .to(wrapper, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: 'power2.out', force3D: true })
+        .to(node, { scale: 1, duration: 0.35, ease: 'back.out(2)' }, '-=0.3');
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTimelineAnimations);
+  } else {
+    initTimelineAnimations();
+  }
+  document.addEventListener('astro:page-load', initTimelineAnimations);
+</script>

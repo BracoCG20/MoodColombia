@@ -1,0 +1,101 @@
+@use "../../styles/variables" as *;
+@use "../../styles/breakpoints" as *;
+
+.footer {
+	background-color: $white;
+	color: $black;
+	padding: 3rem;
+	font-family: $font-primary;
+	overflow: hidden;
+
+	&__container {
+		display: flex;
+		flex-direction: column;
+		gap: 3rem;
+		max-width: 1200px;
+		margin: 0 auto;
+
+		@include tablet {
+			flex-direction: row;
+			justify-content: space-between;
+			align-items: center;
+			gap: 2rem;
+		}
+
+		@include desktop {
+			justify-content: center;
+			gap: 8rem;
+		}
+	}
+
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+
+		@include tablet {
+			flex-direction: row;
+			justify-content: center;
+			gap: 100px;
+		}
+	}
+
+	&__brand {
+		display: flex;
+		justify-content: center;
+
+		@include tablet {
+			justify-content: flex-start;
+			flex-shrink: 0;
+		}
+	}
+
+	&__logo {
+		width: 100%;
+		max-width: 150px;
+		height: auto;
+		object-fit: contain;
+	}
+
+	&__nav,
+	&__info {
+		font-style: normal;
+	}
+
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		text-align: center;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+		@include tablet {
+			text-align: left;
+		}
+	}
+
+	&__item {
+		font-size: 1rem;
+		line-height: 1.5;
+	}
+
+	&__link,
+	&__text {
+		color: $black;
+		transition: opacity 0.2s ease-in-out;
+		text-decoration: none;
+
+		&--bold {
+			font-weight: 700;
+		}
+	}
+
+	&__link {
+		&:hover,
+		&:focus {
+			opacity: 0.6;
+		}
+	}
+}

@@ -1,0 +1,14 @@
+// src/styles/main.scss
+
+// 1. Configuraciones base
+@use "variables";
+@use "breakpoints";
+@use "fonts";
+
+// 2. Estilos globales y reseteos
+@use "layout";
+
+// 3. Estilos de Componentes (Los iremos agregando aquí a medida que los creemos)
+// @use 'header';
+// @use 'footer';
+// @use 'home';

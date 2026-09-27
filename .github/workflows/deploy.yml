@@ -1,0 +1,91 @@
+name: MoodCo CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # ==========================================
+  # JOB 1: VALIDACIÓN Y CONSTRUCCIÓN
+  # ==========================================
+  build-and-validate:
+    name: Build, Check & Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      # 1. Instalar dependencias
+      - name: Install Dependencies
+        id: install
+        run: npm ci
+        continue-on-error: false
+
+      - name: Reportar Error de Dependencias
+        if: failure() && steps.install.outcome == 'failure'
+        run: |
+          echo "::error title=Error de Dependencias::Falló la instalación de paquetes. Verifica tu package.json o si falta alguna librería en tu entorno local."
+
+      # 2. Verificar tipos y sintaxis
+      - name: Astro Check (Linting & Typechecking)
+        id: check
+        run: npx astro check
+        continue-on-error: false
+
+      - name: Reportar Error de Astro Check
+        if: failure() && steps.check.outcome == 'failure'
+        run: |
+          echo "::error title=Error en TypeScript/Astro::Se encontraron errores de sintaxis o de tipado estricto en el proyecto. Revisa los logs de este paso."
+
+      # 3. Compilar el proyecto
+      - name: Build Astro Project
+        id: build
+        run: npm run build
+        continue-on-error: false
+
+      - name: Reportar Error de Compilación (Build)
+        if: failure() && steps.build.outcome == 'failure'
+        run: |
+          echo "::error title=Error de Compilación (Build)::Astro no pudo compilar el proyecto. Puede deberse a un error en el SSR, variables no definidas o importaciones rotas."
+
+  # ==========================================
+  # JOB 2: DESPLIEGUE A PRODUCCIÓN
+  # ==========================================
+  deploy:
+    name: Deploy to Production
+    needs: build-and-validate
+    runs-on: ubuntu-latest
+
+    # IMPORTANTE: Solo despliega si es un push a la rama 'main' (ignora los Pull Requests)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js v22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project for Production
+        run: npm run build
+
+      - name: Ejecutar Despliegue (Deploy)
+        run: |
+          echo "✅ El proyecto pasó todas las pruebas estáticas y se compiló correctamente."

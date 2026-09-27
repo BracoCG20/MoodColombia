@@ -1,0 +1,68 @@
+// src/styles/_fonts.scss
+
+// Amertha
+@font-face {
+	font-family: "Amertha";
+	src: url("../assets/fonts/amertha.woff") format("woff");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+// Agenda black
+@font-face {
+	font-family: "Agenda Black";
+	src: url("../assets/fonts/agenda-black-regular.woff") format("woff");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+// Helvetica Extra Compressed
+@font-face {
+	font-family: "Helvetica LT Std Extra Compressed";
+	src: url("../assets/fonts/helvetica-lt-std-extra-compressed.woff")
+		format("woff");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+// Roc Grotesk
+@font-face {
+	font-family: "Roc Grotesk";
+	src: url("../assets/fonts/roc-grotesk-regular.woff") format("woff");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Roc Grotesk";
+	src: url("../assets/fonts/roc-grotesk-bold.woff") format("woff");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+// Roc Grotesk Condensed
+@font-face {
+	font-family: "Roc Grotesk Condensed";
+	src: url("../assets/fonts/roc-grotesk-condensed-light.woff") format("woff");
+	font-weight: 300;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Roc Grotesk Condensed";
+	src: url("../assets/fonts/roc-grotesk-condensed.woff") format("woff");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Roc Grotesk Condensed";
+	src: url("../assets/fonts/roc-grotesk-condensed-bold.woff") format("woff");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}

@@ -1,0 +1,104 @@
+---
+import { useTranslations, type Lang } from '../../i18n/utils';
+import './Brands.scss';
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+
+const titleReg1 = t('brands.title.regular1') as string;
+const titleBold1 = t('brands.title.bold1') as string;
+const titleReg2 = t('brands.title.regular2') as string;
+const titleBold2 = t('brands.title.bold2') as string;
+const logos = t('brands.logos') as readonly string[];
+
+// Manejo seguro de imágenes con Vite Glob
+const imageFiles = import.meta.glob<{ default: { src: string } }>(
+  '../../assets/logos/*.{png,jpg,jpeg,svg,webp}',
+  { eager: true }
+);
+
+const getImagePath = (filename: string) => {
+  const path = `../../assets/logos/${filename}`;
+  return imageFiles[path] ? imageFiles[path].default.src : '';
+};
+
+// Duplicamos el arreglo para el scroll infinito perfecto
+const loopLogos = [...logos, ...logos];
+---
+
+<section class='brands' aria-labelledby='brands-title' id={lang === 'es' ? 'marcas' : 'brands'} data-animate-section>
+  <div class='brands__container'>
+    <h2 id='brands-title' class='brands__title' data-animate-element>
+      <span class='brands__title-regular'>{titleReg1}</span>
+      <span class='brands__title-bold'>{titleBold1}</span>
+      <span class='brands__title-regular'>{titleReg2}</span>
+      <span class='brands__title-bold'>{titleBold2}</span>
+    </h2>
+
+    <div class='brands__slider'>
+      <div class='brands__track' data-brands-track>
+        {
+          loopLogos.map((filename, index) => {
+            const imagePath = getImagePath(filename);
+            const isOriginal = index < logos.length;
+            
+            return imagePath ? (
+              <div class='brands__item' aria-hidden={!isOriginal ? 'true' : 'false'}>
+                <img
+                  src={imagePath}
+                  alt={`Logo marca ${isOriginal ? index + 1 : ''}`}
+                  class='brands__logo'
+                  loading='lazy'
+                  width="160"
+                  height="80"
+                />
+              </div>
+            ) : null;
+          })
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'; // ✨ Importado
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    const section = document.querySelector('.brands');
+    if (!section) return;
+
+    let ctx = gsap.context(() => {
+      
+      // ✨ NUEVO: Animación de entrada para el título de Brands
+      const title = section.querySelector('[data-animate-element]');
+      if (title) {
+        gsap.set(title, { y: 30, opacity: 0 });
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top 85%',
+          once: true,
+          onEnter: () => gsap.to(title, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' })
+        });
+      }
+
+      // Animación original del Marquee
+      const track = document.querySelector('[data-brands-track]');
+      if (track) {
+        gsap.to(track, {
+          xPercent: -50,
+          ease: 'none',
+          duration: 40,
+          repeat: -1,
+        });
+      }
+    }, section);
+
+    document.addEventListener('astro:before-preparation', () => {
+      ctx.revert();
+    }, { once: true });
+  });
+</script>

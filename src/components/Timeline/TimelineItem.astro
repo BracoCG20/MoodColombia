@@ -1,0 +1,27 @@
+---
+interface Props {
+  number: string;
+  title: string;
+  description: string;
+  align: 'left' | 'right';
+  context: 'mobile' | 'desktop';
+}
+
+const { number, title, description, align, context } = Astro.props;
+---
+
+<article class={`timeline-item timeline-item--${context} timeline-item--${context}-${align}`} data-timeline-item={context}>
+  
+  <div class="timeline-item__circuit">
+    <div class="timeline-item__circuit-node" data-circuit-node></div>
+  </div>
+
+  <div class="timeline-item__content-wrapper">
+    <div class="timeline-item__content">
+      <span class="timeline-item__number">{number}</span>
+      <h3 class="timeline-item__title">{title}</h3>
+      <p class="timeline-item__description">{description}</p>
+    </div>
+  </div>
+  
+</article>

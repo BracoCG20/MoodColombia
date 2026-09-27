@@ -1,0 +1,115 @@
+---
+import { useTranslations, type Lang } from '../../i18n/utils';
+import './About.scss';
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+
+// Definimos la interfaz local para mapear correctamente
+interface StatItem {
+  prefix: string;
+  target: number;
+  suffix: string;
+  label: string;
+}
+
+const stats = t('about.stats') as readonly StatItem[];
+const paragraph = t('about.paragraph') as string;
+---
+
+<section class="about" aria-label="Nosotros y Estadísticas" id={lang === 'es' ? 'nosotros' : 'about-us'} data-animate-section>
+  <div class="about__container">
+    
+    <div class="about__grid">
+      {stats.map((item, index) => (
+        <>
+          <div class="about__item" data-animate-element>
+            <div class="about__value-wrapper">
+              {item.prefix && <span class="about__prefix">{item.prefix}</span>}
+              <span class="about__value" data-counter data-target={item.target}>0</span>
+              {item.suffix && <span class="about__suffix">{item.suffix}</span>}
+            </div>
+            <p class="about__label">{item.label}</p>
+          </div>
+
+          {index < stats.length - 1 && (
+            <div class={`about__divider ${index === 2 ? 'about__divider--desktop-only' : ''}`}></div>
+          )}
+
+          {index === 2 && <div class="about__break"></div>}
+        </>
+      ))}
+    </div>
+
+    <p class="about__paragraph" set:html={paragraph} data-animate-element></p>
+
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    // 1. Buscamos TODOS los contenedores .about (por si hay más de uno en el DOM en transición)
+    const sections = document.querySelectorAll('.about');
+    
+    // Si no hay ninguno en la página actual, salimos silenciosamente
+    if (sections.length === 0) return;
+
+    // 2. Iteramos para crear contextos aislados (evita errores cruzados en SPA)
+    sections.forEach((section) => {
+      let ctx = gsap.context(() => {
+        // Al usar gsap.context con 'section' como scope, 
+        // querySelector busca SÓLO dentro de este componente.
+        const counters = section.querySelectorAll('[data-counter]');
+        const animatedElements = section.querySelectorAll('.about__item, .about__divider, .about__paragraph');
+
+        if (animatedElements.length > 0) {
+          gsap.set(animatedElements, { y: 30, opacity: 0 });
+        }
+
+        ScrollTrigger.create({
+          trigger: section, // Usamos la referencia directa al elemento, no el string '.about'
+          start: 'top 80%', 
+          once: true,       
+          onEnter: () => {
+            if (animatedElements.length > 0) {
+              gsap.to(animatedElements, {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: 'power3.out'
+              });
+            }
+
+            if (counters.length > 0) {
+              counters.forEach(counter => {
+                const target = parseFloat(counter.getAttribute('data-target') || '0');
+                const obj = { val: 0 };
+                
+                gsap.to(obj, {
+                  val: target,
+                  duration: 2.5,
+                  ease: 'power2.out',
+                  delay: 0.3, 
+                  onUpdate: () => {
+                    counter.textContent = Math.floor(obj.val).toString();
+                  }
+                });
+              });
+            }
+          }
+        });
+      }, section); // Pasamos 'section' como Scope
+
+      // Limpieza de memoria exclusiva para este componente
+      document.addEventListener('astro:before-swap', () => {
+        ctx.revert();
+      }, { once: true });
+    });
+  });
+</script>

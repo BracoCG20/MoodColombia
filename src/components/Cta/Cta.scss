@@ -1,0 +1,91 @@
+@use "../../styles/variables" as *;
+@use "../../styles/breakpoints" as *;
+
+.cta {
+	// Ajuste a la variable oficial de la paleta
+	background-color: $color-green-dark;
+	padding: 3rem 1.5rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+
+	&__container {
+		max-width: 1000px;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	&__title {
+		color: $color-green-light;
+		font-family: $font-secondary;
+		text-transform: uppercase;
+		font-size: 2.25rem;
+		line-height: 1.1;
+		margin: 0;
+
+		@include tablet {
+			font-size: 3rem;
+		}
+
+		@include desktop {
+			font-size: 4rem;
+		}
+	}
+
+	&__title-regular,
+	&__title-bold {
+		display: block;
+
+		@include desktop {
+			display: inline-block;
+		}
+	}
+
+	&__title-regular {
+		font-weight: 400;
+
+		@include tablet {
+			margin-right: 0.5rem;
+		}
+	}
+
+	&__title-bold {
+		font-weight: 700;
+	}
+
+	&__description {
+		color: $white;
+		font-family: $font-primary;
+		font-size: 1.125rem;
+		font-weight: 400;
+		line-height: 1.4;
+		margin: 0 auto;
+		max-width: 250px;
+
+		@include tablet {
+			max-width: none;
+			font-size: 1.25rem;
+		}
+
+		@include desktop {
+			font-size: 1.5rem;
+		}
+	}
+
+	&__link {
+		font-weight: 700;
+		padding: 0 4px;
+		text-decoration: underline;
+		color: $white;
+		transition: opacity 0.2s ease-in-out;
+		outline: none;
+
+		&:hover,
+		&:focus {
+			opacity: 0.7;
+		}
+	}
+}

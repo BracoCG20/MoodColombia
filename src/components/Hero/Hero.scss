@@ -1,0 +1,134 @@
+@use "../../styles/variables" as *;
+@use "../../styles/breakpoints" as *;
+
+.hero {
+	position: relative;
+	width: 100%;
+	min-height: 100dvh;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: $black;
+
+	// Capa 1: Video
+	&__video {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		z-index: 1;
+		pointer-events: none;
+	}
+
+	// Capa 2: Overlay
+	&__overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 2;
+		pointer-events: none;
+		// Sugerencia: Puedes darle un fondo oscuro si el video es muy claro
+		// background: linear-gradient(to bottom, rgba($black, 0.3), rgba($black, 0.7));
+	}
+
+	// Capa 3: Contenedor
+	&__content {
+		position: absolute;
+		top: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 100%;
+		height: 100%;
+		max-width: 1400px;
+		z-index: 3;
+		pointer-events: none;
+	}
+
+	// Capa 4: Línea SVG
+	&__line {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 4;
+	}
+
+	// Clases auxiliares para la animación GSAP
+	&__word-wrap {
+		display: inline-flex;
+		overflow: hidden;
+		vertical-align: top;
+	}
+
+	&__word {
+		display: inline-block;
+		will-change: transform;
+	}
+
+	// Capa 5: Textos
+	&__title {
+		position: absolute;
+		color: $white;
+		font-family: $font-secondary;
+		text-transform: uppercase;
+		line-height: 0.95;
+		margin: 0;
+		z-index: 5;
+		text-shadow: 0 4px 16px rgba($black, 0.4);
+
+		// Bloque Superior
+		&--top {
+			font-weight: 700;
+			font-size: 2.55rem;
+			top: 26%;
+			right: 5%;
+
+			@include tablet {
+				font-size: 4rem;
+				top: 20%;
+				right: 8%;
+			}
+
+			@include desktop {
+				font-size: 4.5rem;
+				top: 15%;
+				right: 15%;
+			}
+
+			@include maxDesktop {
+				top: 18%;
+			}
+		}
+
+		// Bloque Inferior
+		&--bottom {
+			font-weight: 300;
+			font-size: 2.5rem;
+			bottom: 13%;
+			left: 5%;
+			text-align: left;
+
+			@include tablet {
+				font-size: 4rem;
+				bottom: 12%;
+				left: 10%;
+			}
+
+			@include desktop {
+				font-size: 5rem;
+				bottom: 10%;
+				left: 10%;
+			}
+
+			@include maxDesktop {
+				left: 20%;
+			}
+		}
+	}
+}

@@ -1,0 +1,336 @@
+---
+import { useTranslations, type Lang } from '../../i18n/utils';
+import './Forms.scss';
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+
+interface FormField {
+  id: string;
+  name: string;
+  label: string;
+  type: string;
+}
+
+const contactFields = t('forms.contact.fields') as readonly FormField[];
+const jobFields = t('forms.jobs.fields') as readonly FormField[];
+---
+
+<section class='forms-section' id={lang === 'es' ? 'contacto' : 'contact'} data-animate-section>
+  
+  <!-- Diccionario de errores pasado al cliente -->
+  <script is:inline define:vars={{
+    errReq: t('forms.error.required'),
+    errName: t('forms.error.name'),
+    errEmail: t('forms.error.email'),
+    errPhone: t('forms.error.phone'),
+    errMsg: t('forms.error.message'),
+    errFileReq: t('forms.error.file.required'),
+    errFileType: t('forms.error.file.type'),
+    errFileSize: t('forms.error.file.size'),
+    txtSending: t('forms.sending'),
+    txtError: t('forms.error.server')
+  }}>
+    window.formTexts = { errReq, errName, errEmail, errPhone, errMsg, errFileReq, errFileType, errFileSize, txtSending, txtError };
+  </script>
+
+  <!-- ============================================== -->
+  <!-- FORMULARIO 1: CONTACTO                         -->
+  <!-- ============================================== -->
+  <div class='forms-section__wrapper is-active' id='wrapper-contacto'>
+    <div class='forms-section__content'>
+      <header class='forms-section__header' data-animate-element>
+        <h2 class='forms-section__title'>
+          <span class='forms-section__title-regular'>{t('forms.contact.title.regular')}</span>
+          <span class='forms-section__title-bold'>{t('forms.contact.title.bold')}</span>
+        </h2>
+        <p class='forms-section__subtitle'>{t('forms.contact.subtitle')}</p>
+      </header>
+
+      <form class='form' id='form-contacto' novalidate>
+        <input type='hidden' name='formType' value='contacto' />
+        <input type='text' name='bot_check' style='display: none;' tabindex='-1' autocomplete='off' aria-hidden='true' />
+
+        {
+          contactFields.map((field) => (
+            <div class='form__group'>
+              <label for={field.id} class='form__label'>{field.label}</label>
+              <input type={field.type as any} id={field.id} name={field.name} class='form__input' required />
+              <span class='form__error' data-error-for={field.id} />
+            </div>
+          ))
+        }
+
+        <div class='form__actions'>
+          <button type='submit' class='form__btn form__btn--submit' data-btn='submit'>
+            {t('forms.contact.btn.submit')}
+          </button>
+          <button type='button' class='form__btn form__btn--success is-hidden' data-btn='success'>
+            {t('forms.contact.btn.success')}
+            <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+              <circle data-check-circle cx='12' cy='12' r='10'></circle>
+              <path data-check-path d='M8 12l3 3 6-6'></path>
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- FORMULARIO 2: TRABAJA CON NOSOTROS            -->
+  <!-- ============================================== -->
+  <div class='forms-section__wrapper' id='wrapper-trabaja'>
+    <div class='forms-section__content'>
+      <header class='forms-section__header'>
+        <h2 class='forms-section__title'>
+          <span class='forms-section__title-bold'>{t('forms.jobs.title.bold1')}</span>
+          <span class='forms-section__title-regular'>{t('forms.jobs.title.regular')}</span>
+          <span class='forms-section__title-bold'>{t('forms.jobs.title.bold2')}</span>
+        </h2>
+        <p class='forms-section__subtitle'>{t('forms.jobs.subtitle')}</p>
+      </header>
+
+      <form class='form' id='form-trabaja-con-nosotros' novalidate>
+        <input type='hidden' name='formType' value='trabaja' />
+        <input type='text' name='bot_check' style='display: none;' tabindex='-1' autocomplete='off' aria-hidden='true' />
+
+        {
+          jobFields.map((field) => (
+            <div class='form__group'>
+              <label for={field.id} class='form__label'>{field.label}</label>
+              <input type={field.type as any} id={field.id} name={field.name} class='form__input' required />
+              <span class='form__error' data-error-for={field.id} />
+            </div>
+          ))
+        }
+
+        <div class='form__group form__group--file'>
+          <label for='t-archivo' class='form__label form__label--file'>
+            {t('forms.jobs.uploadLabel')}
+            <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'>
+              <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'></path>
+              <polyline points='17 8 12 3 7 8'></polyline>
+              <line x1='12' y1='3' x2='12' y2='15'></line>
+            </svg>
+          </label>
+          <input type='file' id='t-archivo' name='archivo' class='form__input-file' accept='.pdf,.doc,.docx' required />
+          <span class='form__error' data-error-for='t-archivo'></span>
+        </div>
+
+        <div class='form__actions'>
+          <button type='submit' class='form__btn form__btn--submit' data-btn='submit'>
+            {t('forms.jobs.btn.submit')}
+          </button>
+          <button type='button' class='form__btn form__btn--success is-hidden' data-btn='success'>
+            {t('forms.jobs.btn.success')}
+            <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'>
+              <circle data-check-circle cx='12' cy='12' r='10'></circle>
+              <path data-check-path d='M8 12l3 3 6-6'></path>
+            </svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger)
+
+  // Declaramos la interfaz para evitar errores de TS con el objeto inyectado en línea
+  declare global {
+    interface Window { formTexts: any; }
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    const section = document.querySelector('.forms-section');
+
+   if (section) {
+      gsap.context(() => {
+        const headers = section.querySelectorAll('[data-animate-element]');
+        if (headers.length > 0) {
+          gsap.set(headers, { y: 30, opacity: 0 });
+          ScrollTrigger.create({
+            trigger: section,
+            start: 'top 85%',
+            once: true,
+            onEnter: () => gsap.to(headers, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' })
+          });
+        }
+      }, section);
+    }
+    const triggerButtons = document.querySelectorAll('[data-form-trigger]');
+    const wrapperContacto = document.getElementById('wrapper-contacto');
+    const wrapperTrabaja = document.getElementById('wrapper-trabaja');
+
+    // ANIMACIÓN DE TRANSICIÓN SUAVE ENTRE FORMULARIOS
+    triggerButtons.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = btn.getAttribute('data-form-trigger');
+        const isTargetTrabaja = target === 'trabaja';
+
+        const currentActive = isTargetTrabaja ? wrapperContacto : wrapperTrabaja;
+        const nextActive = isTargetTrabaja ? wrapperTrabaja : wrapperContacto;
+
+        if (currentActive && nextActive && !nextActive.classList.contains('is-active')) {
+          gsap.to(currentActive, {
+            opacity: 0,
+            duration: 0.3,
+            onComplete: () => {
+              currentActive.classList.remove('is-active');
+              nextActive.classList.add('is-active');
+              gsap.fromTo(nextActive, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+              
+              const sectionEl = document.querySelector('.forms-section');
+              if (sectionEl) sectionEl.scrollIntoView({ behavior: 'smooth' });
+            }
+          });
+        }
+      });
+    });
+
+    const validateForm = (formElement: HTMLFormElement): boolean => {
+      let isValid = true;
+      const inputs = formElement.querySelectorAll('input:not([type="hidden"]):not([type="file"])');
+      const fileInput = formElement.querySelector('input[type="file"]') as HTMLInputElement;
+      const t = window.formTexts;
+
+      formElement.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
+      formElement.querySelectorAll('.form__error').forEach((el) => (el.textContent = ''));
+
+      inputs.forEach((input) => {
+        const inputEl = input as HTMLInputElement;
+        const name = inputEl.name;
+        const value = inputEl.value.trim();
+        const errorEl = formElement.querySelector(`[data-error-for="${inputEl.id}"]`);
+        let errorMessage = '';
+
+        if (inputEl.required && !value) {
+          errorMessage = t.errReq;
+        } else if (value) {
+          if (name === 'nombre') {
+            if (!/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/.test(value) || value.length < 2 || value.length > 50) errorMessage = t.errName;
+          } else if (name === 'correo') {
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) errorMessage = t.errEmail;
+          } else if (name === 'telefono') {
+            if (!/^\+?[\d\s\-]{6,20}$/.test(value)) errorMessage = t.errPhone;
+          } else if (name === 'mensaje') {
+            if (value.length > 2000) errorMessage = t.errMsg;
+          }
+        }
+
+        if (errorMessage) {
+          inputEl.classList.add('is-invalid');
+          if (errorEl) {
+            errorEl.textContent = errorMessage;
+            gsap.fromTo(errorEl, { opacity: 0, y: -5 }, { opacity: 1, y: 0, duration: 0.3 });
+          }
+          isValid = false;
+        }
+      });
+
+      if (fileInput && fileInput.required) {
+        const errorEl = formElement.querySelector(`[data-error-for="${fileInput.id}"]`);
+        const file = fileInput.files?.[0];
+        let errorMessage = '';
+
+        if (!file) {
+          errorMessage = t.errFileReq;
+        } else {
+          const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+          if (!validTypes.includes(file.type)) errorMessage = t.errFileType;
+          else if (file.size > 5 * 1024 * 1024) errorMessage = t.errFileSize;
+        }
+
+        if (errorMessage) {
+          if (errorEl) {
+            errorEl.textContent = errorMessage;
+            gsap.fromTo(errorEl, { opacity: 0, y: -5 }, { opacity: 1, y: 0, duration: 0.3 });
+          }
+          isValid = false;
+        }
+      }
+      return isValid;
+    };
+
+    const forms = document.querySelectorAll('.form');
+    const t = window.formTexts;
+
+    forms.forEach((form) => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formElement = form as HTMLFormElement;
+
+        if (!validateForm(formElement)) return;
+
+        const submitBtn = formElement.querySelector('[data-btn="submit"]') as HTMLButtonElement;
+        const successBtn = formElement.querySelector('[data-btn="success"]') as HTMLButtonElement;
+        const circlePath = successBtn?.querySelector('[data-check-circle]');
+        const checkPath = successBtn?.querySelector('[data-check-path]');
+
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = t.txtSending;
+        submitBtn.disabled = true;
+
+        const loadingTween = gsap.to(submitBtn, { opacity: 0.6, repeat: -1, yoyo: true, duration: 0.4, ease: 'power1.inOut' });
+
+        try {
+          const formData = new FormData(formElement);
+          const response = await fetch('/api/forms/submit', { method: 'POST', body: formData });
+          
+          const contentType = response.headers.get('content-type');
+          let result;
+
+          if (contentType && contentType.includes('application/json')) {
+            result = await response.json();
+          } else {
+            throw new Error(`Error en el servidor (${response.status})`);
+          }
+
+          if (!response.ok || !result.success) throw new Error(result.message || 'Error en el servidor');
+
+          loadingTween.kill();
+          gsap.set(submitBtn, { opacity: 1 });
+
+          submitBtn.classList.add('is-hidden');
+          successBtn.classList.remove('is-hidden');
+
+          gsap.fromTo(successBtn, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.5)' });
+
+          if (circlePath && checkPath) {
+            gsap.fromTo(circlePath, { strokeDasharray: 65, strokeDashoffset: 65 }, { strokeDashoffset: 0, duration: 0.5, ease: 'power2.out', delay: 0.1 });
+            gsap.fromTo(checkPath, { strokeDasharray: 20, strokeDashoffset: 20 }, { strokeDashoffset: 0, duration: 0.4, ease: 'power2.out', delay: 0.4 });
+          }
+
+          formElement.reset();
+          formElement.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
+          formElement.querySelectorAll('.form__error').forEach((el) => (el.textContent = ''));
+
+          setTimeout(() => {
+            gsap.to(successBtn, {
+              opacity: 0, scale: 0.95, duration: 0.3,
+              onComplete: () => {
+                successBtn.classList.add('is-hidden');
+                submitBtn.classList.remove('is-hidden');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                gsap.fromTo(submitBtn, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+              },
+            });
+          }, 4000);
+        } catch (error: any) {
+          loadingTween.kill();
+          gsap.set(submitBtn, { opacity: 1 });
+          submitBtn.textContent = t.txtError;
+          submitBtn.disabled = false;
+          setTimeout(() => { submitBtn.textContent = originalText; }, 3000);
+        }
+      });
+    });
+  });
+</script>

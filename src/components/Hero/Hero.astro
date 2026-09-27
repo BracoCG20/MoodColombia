@@ -1,0 +1,105 @@
+---
+import { useTranslations, type Lang } from '../../i18n/utils';
+import './Hero.scss';
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+
+// Solución al error: Añadimos la palabra "readonly" antes del tipo de dato
+const topText = t('hero.topText') as readonly string[];
+const bottomText = t('hero.bottomText') as readonly string[];
+---
+
+<section
+  class='hero'
+  aria-label='Introducción Principal'
+  data-animate-section
+>
+  <video
+    class='hero__video'
+    autoplay
+    muted
+    loop
+    playsinline
+    transition:persist="hero-video"
+    poster='/poster_hero.webp' 
+  >
+    <source src='/fondo_hero.webm' type='video/webm' />
+    Tu navegador no soporta la etiqueta de video.
+  </video>
+
+  <div class='hero__overlay'></div>
+
+  <div class='hero__content'>
+    <svg
+      class='hero__line'
+      viewBox='0 0 1000 1000'
+      preserveAspectRatio='none'
+      aria-hidden='true'
+    >
+      <path
+        class='hero__path'
+        d='M 750, 420 C 750, 800 600, 820 400, 820'
+        fill='none'
+        stroke='#FFFFFF'
+        stroke-width='2'
+        vector-effect='non-scaling-stroke'
+      ></path>
+    </svg>
+
+    <h1 class='hero__title hero__title--top'>
+      {
+        topText.map((line, index) => (
+          <>
+            <span class='hero__word-wrap'>
+              <span class='hero__word'>{line}</span>
+            </span>
+            {index < topText.length - 1 && <br />}
+          </>
+        ))
+      }
+    </h1>
+
+    <h2 class='hero__title hero__title--bottom'>
+      {
+        bottomText.map((line, index) => (
+          <>
+            <span class='hero__word-wrap'>
+              <span class='hero__word'>{line}</span>
+            </span>
+            {index < bottomText.length - 1 && <br />}
+          </>
+        ))
+      }
+    </h2>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+
+  document.addEventListener('astro:page-load', () => {
+    const hero = document.querySelector('.hero');
+    if (!hero) return;
+
+    let ctx = gsap.context(() => {
+      const tl = gsap.timeline({ delay: 0.2 });
+      
+      const path = document.querySelector('.hero__path') as SVGPathElement;
+      if (path) {
+        const length = path.getTotalLength();
+        gsap.set(path, { strokeDasharray: length, strokeDashoffset: length, opacity: 0 });
+        tl.to(path, { strokeDashoffset: 0, opacity: 0.6, duration: 2, ease: 'power3.inOut' });
+      }
+
+      const words = document.querySelectorAll('.hero__word');
+      gsap.set(words, { y: '100%' });
+      tl.to(words, { y: '0%', duration: 1, stagger: 0.1, ease: 'power4.out' }, '-=1.2');
+
+    }, hero);
+
+    document.addEventListener('astro:before-preparation', () => {
+      ctx.revert();
+    }, { once: true });
+  });
+</script>

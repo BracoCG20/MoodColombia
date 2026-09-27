@@ -1,0 +1,498 @@
+@use "sass:color";
+@use "../../styles/variables" as *;
+@use "../../styles/breakpoints" as *;
+
+.cases {
+	width: 100%;
+	background-color: $white;
+	padding-bottom: 5rem;
+
+	// QA: Mejor soporte en Safari/iOS que clip/contain
+	overflow: hidden;
+
+	@include tablet {
+		padding-bottom: 7rem;
+	}
+
+	@include desktop {
+		padding-bottom: 4rem;
+	}
+
+	&__header {
+		padding: 4rem 1.5rem 2rem;
+		text-align: center;
+	}
+
+	&__heading {
+		font-family: $font-secondary;
+		font-size: 2rem;
+		line-height: 1.1;
+		color: $color-green-dark;
+		margin: 0;
+
+		@include tablet {
+			font-size: 3rem;
+		}
+		@include desktop {
+			font-size: 3.5rem;
+		}
+	}
+
+	&__heading-regular {
+		font-weight: 400;
+	}
+	&__heading-bold {
+		font-weight: 700;
+	}
+
+	// -----------------------------------------
+	// Contenedor principal de la ventana (Máscara)
+	// -----------------------------------------
+	&__carousel-wrapper {
+		width: 100%;
+		height: 75vh;
+		min-height: 550px;
+		max-height: 800px;
+		overflow: hidden;
+		padding: 0 1.5rem;
+		position: relative;
+
+		&::before,
+		&::after {
+			content: "";
+			position: absolute;
+			left: 0;
+			width: 100%;
+			height: 80px;
+			z-index: 5;
+			pointer-events: none;
+			display: none;
+
+			@include tablet {
+				display: block;
+			}
+		}
+
+		&::before {
+			top: 0;
+			background: linear-gradient(
+				to bottom,
+				$white 0%,
+				rgba(255, 255, 255, 0) 100%
+			);
+		}
+
+		&::after {
+			bottom: 0;
+			background: linear-gradient(
+				to top,
+				$white 0%,
+				rgba(255, 255, 255, 0) 100%
+			);
+		}
+	}
+
+	// -----------------------------------------
+	// SISTEMA RESPONSIVE CON FLEXBOX
+	// -----------------------------------------
+	&__columns {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		gap: 1.5rem;
+		height: 100%;
+		width: 100%;
+		max-width: 1200px;
+		margin: 0 auto;
+
+		@include tablet {
+			gap: 2rem;
+		}
+		@include desktop {
+			gap: 2.5rem;
+		}
+	}
+
+	&__col {
+		flex: 0 1 480px;
+		max-width: 480px;
+		min-width: 0;
+		height: 100%;
+		overflow: visible;
+		display: none;
+
+		// QA: Optimización de rendimiento para el track
+		will-change: transform;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+
+		&--1 {
+			display: block;
+
+			@media (max-width: 1023px) {
+				// QA: pan-y permite hacer scroll en la página si tocan el slider, evitando que se quede atascado
+				touch-action: pan-y;
+			}
+		}
+
+		@include tablet {
+			flex-basis: 320px;
+			max-width: 320px;
+			&--2 {
+				display: block;
+			}
+		}
+		@include desktop {
+			flex-basis: 400px;
+			max-width: 400px;
+		}
+	}
+
+	&__track {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		padding-bottom: 1.5rem;
+		height: max-content;
+		margin: 0;
+		will-change: transform;
+
+		@include tablet {
+			gap: 2rem;
+			padding-bottom: 2rem;
+		}
+		@include desktop {
+			gap: 2.5rem;
+			padding-bottom: 2.5rem;
+		}
+	}
+}
+
+/* =========================================
+   Estilos de la Card Individual
+========================================= */
+.case-card {
+	background-color: $color-green-light;
+	border-radius: 24px;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+
+	// QA: Aceleración de Hardware para animaciones fluidas en móviles
+	will-change: transform;
+	transform: translateZ(0);
+
+	&__trigger {
+		background: none;
+		border: none;
+		padding: 0;
+		margin: 0;
+		width: 100%;
+		cursor: pointer;
+		text-align: left;
+		position: relative;
+		outline: none;
+	}
+
+	&__image-wrapper {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		overflow: hidden;
+		background-color: $color-green-light;
+	}
+
+	&__image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		transform-origin: center center;
+		will-change: transform; // QA: Solo si se hace zoom en hover
+	}
+
+	&__gradient {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 70%;
+		background: linear-gradient(
+			to top,
+			rgba($color-green-dark, 0.8) 0%,
+			rgba(0, 0, 0, 0) 100%
+		);
+		pointer-events: none;
+		z-index: 1;
+	}
+
+	&__hover-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: $color-green-light;
+		opacity: 0;
+		pointer-events: none;
+		z-index: 2;
+		mix-blend-mode: multiply;
+	}
+
+	&__title {
+		position: absolute;
+		bottom: 1.5rem;
+		left: 1.5rem;
+		color: $white;
+		font-family: $font-secondary;
+		font-weight: 700;
+		font-size: 1.75rem;
+		line-height: 1;
+		margin: 0;
+		text-transform: uppercase;
+		z-index: 3;
+
+		@include tablet {
+			font-size: 2.25rem;
+		}
+	}
+
+	&__body {
+		background-color: $color-green-light;
+		width: 100%;
+	}
+
+	&__content {
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.75rem;
+	}
+
+	&__description {
+		color: $black;
+		font-family: $font-primary;
+		font-size: 1rem;
+		line-height: 1.4;
+		margin: 0;
+	}
+
+	&__tags {
+		color: $black;
+		font-family: $font-primary;
+		font-size: 0.875rem;
+		text-decoration: underline;
+	}
+
+	&__link {
+		color: $black;
+		font-family: $font-secondary;
+		font-weight: 700;
+		font-size: 1.25rem;
+		text-transform: uppercase;
+		transition: opacity 0.2s ease;
+		border: none;
+		background: none;
+		cursor: pointer;
+		margin-top: 0.5rem;
+
+		&:hover,
+		&:focus {
+			opacity: 0.6;
+		}
+	}
+}
+
+/* =========================================
+   Modal de Video
+========================================= */
+.video-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	display: none;
+	align-items: center;
+	justify-content: center;
+	padding: 1rem;
+
+	@include tablet {
+		padding: 2rem;
+	}
+
+	// ----- Backdrop -----
+	&__backdrop {
+		position: absolute;
+		inset: 0;
+		background-color: rgba($color-green-dark, 0.85);
+		cursor: pointer;
+		opacity: 0;
+	}
+
+	// ----- Contenedor del modal -----
+	&__container {
+		position: relative;
+		z-index: 1;
+		width: 100%;
+		max-width: 860px;
+		border-radius: 4px;
+		overflow: hidden;
+		opacity: 0;
+		will-change: transform, opacity;
+	}
+
+	// ----- Header: título + botón cerrar -----
+	&__header {
+		position: absolute;
+		top: 0;
+		width: 100%;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.75rem 1.25rem;
+	}
+
+	&__title {
+		font-family: $font-secondary;
+		font-size: 1rem;
+		color: $white;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+
+	&__close {
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-family: $font-secondary;
+		font-size: 1rem;
+		color: $white;
+		text-transform: lowercase;
+		letter-spacing: 0.04em;
+		padding: 0.25rem 0.5rem;
+		transition: opacity 0.2s ease-in-out;
+
+		&:hover {
+			opacity: 0.6;
+		}
+	}
+
+	// ----- Área del video -----
+	&__media {
+		position: relative;
+		width: 100%;
+		background-color: $color-green-dark;
+		aspect-ratio: 16 / 9;
+		overflow: hidden;
+	}
+
+	&__video {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		cursor: pointer;
+	}
+
+	// ----- Botón Play/Pausa -----
+	&__play-btn {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		background-color: $color-green-light;
+		border: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: $color-green-dark;
+		transition: background-color 0.2s ease;
+		will-change: transform, opacity;
+
+		@include tablet {
+			width: 72px;
+			height: 72px;
+		}
+
+		&:hover {
+			background-color: color.adjust(#99ff99, $lightness: -8%);
+		}
+
+		svg {
+			width: 28px;
+			height: 28px;
+
+			@include tablet {
+				width: 32px;
+				height: 32px;
+			}
+		}
+	}
+
+	// ----- Barra de progreso -----
+	&__progress {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		padding: 1rem 1.25rem 0.85rem;
+		background: linear-gradient(
+			to top,
+			rgba($color-green-dark, 0.7) 0%,
+			transparent 100%
+		);
+		cursor: pointer;
+	}
+
+	&__progress-track {
+		position: relative;
+		width: 100%;
+		height: 3px;
+		background-color: rgba($white, 0.3);
+		border-radius: 999px;
+		cursor: pointer;
+		&::before {
+			content: "";
+			position: absolute;
+			inset: -8px 0;
+		}
+	}
+
+	&__progress-fill {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 0%;
+		background-color: $color-green-light;
+		border-radius: 999px;
+		pointer-events: none;
+	}
+
+	&__progress-knob {
+		position: absolute;
+		top: 50%;
+		left: 0%;
+		width: 12px;
+		height: 12px;
+		border-radius: 50%;
+		background-color: $color-green-light;
+		transform: translate(-50%, -50%);
+		pointer-events: none;
+		transition: transform 0.1s ease;
+
+		.video-modal__progress-track:hover & {
+			transform: translate(-50%, -50%) scale(1.4);
+		}
+	}
+}

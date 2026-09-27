@@ -1,0 +1,47 @@
+---
+interface Props {
+  title: readonly string[]; // CORRECCIÓN: readonly
+  description: string;
+  tags: string;
+  link: string;
+  imageSrc: string;
+  video?: string;
+  btnText: string;
+}
+
+const { title, description, tags, link, imageSrc, video, btnText } = Astro.props;
+const titleStr = title.join(' ');
+---
+
+<article class='case-card' data-case-card>
+  <button class='case-card__trigger' data-case-trigger aria-expanded='false'>
+    <div class='case-card__image-wrapper'>
+      { imageSrc && (
+        <img src={imageSrc} alt={`Caso: ${titleStr}`} class='case-card__image' data-case-img loading='lazy' />
+      )}
+      <div class='case-card__gradient'></div>
+      <div class='case-card__hover-overlay' data-case-overlay></div>
+    </div>
+
+    <h3 class='case-card__title'>
+      {
+        title.map((line, index) => (
+          <>
+            {line}
+            {index !== title.length - 1 && <br />}
+          </>
+        ))
+      }
+    </h3>
+  </button>
+
+  <div class='case-card__body' data-case-body>
+    <div class='case-card__content'>
+      <p class='case-card__description'>{description}</p>
+      <span class='case-card__tags'>{tags}</span>
+      <button class='case-card__link' data-ver-caso data-title={titleStr} data-video={video ?? ''} type='button'>
+        {btnText}
+      </button>
+    </div>
+  </div>
+</article>

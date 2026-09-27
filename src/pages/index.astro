@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero/Hero.astro';
+import About from '../components/About/About.astro';
+import Timeline from '../components/Timeline/Timeline.astro';
+import Works from '../components/Works/Works.astro';
+import Brands from '../components/Brands/Brands.astro';
+import Cta from '../components/Cta/Cta.astro';
+import Forms from '../components/Forms/Forms.astro';
+---
+
+<Layout 
+  title="Agencia Digital Creativa - MOOD Colombia" 
+  description="Agencia Creativa Digital. ¿What's your mood? Transformamos el mood de las marcas en resultados reales que puedes medir."
+>
+  <Hero />
+  <About />
+  <Timeline />
+  <Works />
+  <Brands />
+  <!-- CTA invita a llenar el formulario, por lo que va justo antes -->
+  <Forms />
+  <Cta />
+</Layout>

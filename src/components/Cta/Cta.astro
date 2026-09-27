@@ -1,0 +1,62 @@
+---
+import { useTranslations, type Lang } from '../../i18n/utils';
+import './Cta.scss';
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+---
+
+<section class='cta' aria-labelledby='cta-title' id='cta'>
+  <div class='cta__container'>
+    <h2 id='cta-title' class='cta__title' data-animate-element>
+      <span class='cta__title-regular'>{t('cta.title.regular')}</span>
+      <span class='cta__title-bold'>{t('cta.title.bold')}</span>
+    </h2>
+
+    <p class='cta__description' data-animate-element>
+      {t('cta.desc.before')}
+      <a href='#contacto' class='cta__link' data-form-trigger='trabaja'>
+        {t('cta.desc.link')}
+      </a>
+      {t('cta.desc.after')}
+    </p>
+  </div>
+</section>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    const section = document.querySelector('.cta');
+    if (!section) return;
+
+    let ctx = gsap.context(() => {
+      // ✨ CORRECCIÓN: Usamos 'section' en lugar de 'document'
+      const elements = section.querySelectorAll('[data-animate-element]');
+      
+      gsap.set(elements, { y: 30, opacity: 0 });
+
+      ScrollTrigger.create({
+        trigger: section,
+        start: 'top 85%',
+        once: true,
+        onEnter: () => {
+          gsap.to(elements, {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: 'power3.out'
+          });
+        }
+      });
+    }, section);
+
+    document.addEventListener('astro:before-preparation', () => {
+      ctx.revert();
+    }, { once: true });
+  });
+</script>

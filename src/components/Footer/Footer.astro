@@ -1,0 +1,126 @@
+---
+import { useTranslations, getTranslatedRoute, type Lang } from '../../i18n/utils';
+import './Footer.scss';
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+
+// Tipado estricto
+interface FooterLink { label: string; route: any; }
+interface ContactInfo { label: string; url: string | null; isBold: boolean; formTrigger?: string; }
+
+const links = t('footer.links') as readonly FooterLink[];
+const contactInfo = t('footer.contact') as readonly ContactInfo[];
+---
+
+<footer class='footer' data-animate-section>
+  <div class='footer__container'>
+    <div class='footer__content'>
+      <div class='footer__brand' data-animate-element>
+        <img
+          src='/logo_footer.webp'
+          alt="Mood Agencia Creativa Digital"
+          class='footer__logo'
+          width='180'
+          height='auto'
+          loading='lazy'
+        />
+      </div>
+
+      <nav class='footer__nav' aria-label='Navegación del pie de página' data-animate-element>
+        <ul class='footer__list'>
+          {
+            links.map((link) => (
+              <li class='footer__item'>
+                <a href={getTranslatedRoute(link.route, lang)} class='footer__link' data-scroll-link>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Información de contacto -->
+    <address class='footer__info' data-animate-element>
+      <ul class='footer__list'>
+        {
+          contactInfo.map((info) => (
+            <li class='footer__item'>
+              {info.url ? (
+                <a
+                  href={info.url}
+                  class={`footer__link ${info.isBold ? 'footer__link--bold' : ''}`}
+                  data-form-trigger={info.formTrigger || undefined}
+                >
+                  {info.label}
+                </a>
+              ) : (
+                <span class={`footer__text ${info.isBold ? 'footer__text--bold' : ''}`}>
+                  {info.label}
+                </span>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </address>
+  </div>
+</footer>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    const footer = document.querySelector('.footer');
+    if (!footer) return;
+
+    let ctx = gsap.context(() => {
+      // ✨ CORRECCIÓN: Usamos 'footer' en lugar de 'document'
+      const elements = footer.querySelectorAll('[data-animate-element]');
+
+      gsap.set(elements, { y: 20, opacity: 0 });
+
+      ScrollTrigger.create({
+        trigger: footer,
+        start: 'top 95%',
+        once: true,
+        onEnter: () => {
+          gsap.to(elements, {
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: 'power2.out',
+          });
+        },
+      });
+
+      // Smooth scroll para los enlaces de navegación del footer
+      const scrollLinks = footer.querySelectorAll('[data-scroll-link]'); // También lo aseguramos aquí
+      scrollLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+          const href = link.getAttribute('href');
+          if (href && href.includes('#')) {
+            e.preventDefault();
+            const targetId = href.split('#')[1];
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+              e.preventDefault();
+              targetEl.scrollIntoView({ behavior: 'smooth' });
+            }
+          }
+        });
+      });
+
+    }, footer);
+
+    document.addEventListener('astro:before-preparation', () => {
+      ctx.revert();
+    }, { once: true });
+  });
+</script>

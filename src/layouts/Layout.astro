@@ -1,0 +1,201 @@
+---
+// src/layouts/Layout.astro
+import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header/Header.astro';
+import Footer from '../components/Footer/Footer.astro';
+import { useTranslations, type Lang } from '../i18n/utils';
+import '../styles/main.scss';
+
+export interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  keywords?: string;
+}
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+
+// Descripciones por defecto según el idioma
+const defaultDesc = lang === 'es' 
+  ? "Agencia Creativa Digital. Transformamos el mood de las marcas en resultados reales." 
+  : "Digital Creative Agency. We transform brand moods into real results.";
+
+const {
+  title,
+  description = defaultDesc,
+  image = '/poster_hero.webp',
+  keywords = 'agencia creativa digital colombia, marketing digital bogotá, branding, performance, MoodCo',
+} = Astro.props;
+
+// Configuración de URLs para SEO
+const siteUrl = Astro.site || 'https://mood.com.co';
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+const imageUrl = new URL(image, canonicalURL);
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset='UTF-8' />
+    <!-- Color verde oscuro corporativo para navegadores móviles -->
+    <meta name="theme-color" content="#264125"> 
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    
+    <!-- Favicons -->
+    <link rel='icon' href='/Logo_Mood.ico' />
+    <meta name='generator' content={Astro.generator} />
+    <link rel='icon' href='/Logo_Mood192.png' type='image/png' sizes='192x192' />
+    <link rel='apple-touch-icon' href='/apple-icon.png' />
+
+    <!-- SEO Básico -->
+    <title>{title}</title>
+    <meta name="away-title" content={t('seo.awayTitle') as string} />
+    <meta name='description' content={description} />
+    <meta name='author' content='Cristian Braco' />
+    <meta name='keywords' content={keywords} />
+    <meta name='robots' content='index, follow' />
+    <link rel='canonical' href={canonicalURL} />
+
+    <!-- SEO Internacional: Enrutamiento de Idiomas y Regiones para Google -->
+    <link rel="alternate" hreflang="es-CO" href={new URL(canonicalURL.pathname.replace(/^\/en/, ''), siteUrl)} />
+    <link rel="alternate" hreflang="en-CO" href={new URL('/en' + canonicalURL.pathname.replace(/^\/en/, ''), siteUrl)} />
+    <link rel="alternate" hreflang="es-PE" href="https://mood.pe/" /> <!-- Sede Principal Perú -->
+    <link rel="alternate" hreflang="x-default" href={new URL(canonicalURL.pathname.replace(/^\/en/, ''), siteUrl)} />
+
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property='og:type' content='website' />
+    <meta property='og:url' content={canonicalURL} />
+    <meta property='og:title' content={`${title} | MoodCo`} />
+    <meta property='og:description' content={description} />
+    <meta property='og:image' content={imageUrl} />
+    <meta property='og:site_name' content='MoodCo Colombia' />
+    <meta property='og:locale' content={lang === 'es' ? 'es_CO' : 'en_US'} />
+
+    <!-- Twitter -->
+    <meta property='twitter:card' content='summary_large_image' />
+    <meta property='twitter:url' content={canonicalURL} />
+    <meta property='twitter:title' content={`${title} | MoodCo`} />
+    <meta property='twitter:description' content={description} />
+    <meta property='twitter:image' content={imageUrl} />
+
+    <!-- JSON-LD SEO (Estructura de la Organización) -->
+    <script type='application/ld+json' set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "MoodCo",
+      "url": "https://mood.com.co",
+      "logo": "https://mood.com.co/logo_header.webp",
+      "description": description,
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Bogotá",
+        "addressCountry": "CO"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "desguerra@mood.com.co",
+        "telephone": "+573105611021",
+        "contactType": "customer service",
+        "availableLanguage": ["es", "en"]
+      },
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Mood Agencia",
+        "url": "https://mood.pe"
+      }
+    })} />
+    
+    <!-- ViewTransitions de Astro -->
+    <ClientRouter/>
+  </head>
+  <body>
+    <!-- Header Global -->
+    <Header />
+    
+    <main>
+      <slot />
+    </main>
+
+    <!-- Footer Global -->
+    <Footer />
+
+    <script>
+      import Lenis from 'lenis';
+      import { gsap } from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      // FORZAR SCROLL AL INICIO EN RECARGAS DURAS (F5 / CTRL+R)
+      if (history.scrollRestoration) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      let lenis: Lenis;
+
+      const initLenis = () => {
+        lenis = new Lenis({
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          orientation: 'vertical',
+          gestureOrientation: 'vertical',
+          smoothWheel: true,
+          touchMultiplier: 2,
+        });
+
+        lenis.on('scroll', ScrollTrigger.update);
+
+        gsap.ticker.add((time) => {
+          lenis.raf(time * 1000);
+        });
+        
+        gsap.ticker.lagSmoothing(0);
+      };
+
+      // ==========================================
+      // LÓGICA DE TÍTULO DINÁMICO (CAMBIO DE PESTAÑA)
+      // ==========================================
+      let originalTitle = document.title;
+      let awayTitle = "¡Vuelve! 🌶️";
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          document.title = awayTitle;
+        } else {
+          document.title = originalTitle;
+        }
+      });
+
+      // Manejo de eventos en Astro SPA
+      document.addEventListener('astro:page-load', () => {
+        initLenis();
+
+        // Actualizamos las variables del título dinámico al cambiar de página (idioma)
+        originalTitle = document.title;
+        const metaAway = document.querySelector('meta[name="away-title"]');
+        if (metaAway) {
+          awayTitle = metaAway.getAttribute('content') || awayTitle;
+        }
+
+        // FIX: Forzar a GSAP a recalcular tras la carga
+        setTimeout(() => {
+          ScrollTrigger.refresh();
+        }, 500);
+      });
+
+      window.addEventListener('load', () => {
+        ScrollTrigger.refresh();
+      });
+
+      document.addEventListener('astro:before-swap', () => {
+        if (lenis) {
+          lenis.destroy();
+          gsap.ticker.remove(lenis.raf);
+        }
+        ScrollTrigger.getAll().forEach(t => t.kill());
+      });
+    </script>
+  </body>
+</html>

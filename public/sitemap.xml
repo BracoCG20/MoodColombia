@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Versión Español -->
+  <url>
+    <loc>https://mood.com.co/</loc>
+    <lastmod>2026-09-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.00</priority>
+    <xhtml:link rel="alternate" hreflang="es-CO" href="https://mood.com.co/"/>
+    <xhtml:link rel="alternate" hreflang="en-CO" href="https://mood.com.co/en/"/>
+    <xhtml:link rel="alternate" hreflang="es-PE" href="https://mood.pe/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mood.com.co/"/>
+  </url>
+  
+  <!-- Versión Inglés -->
+  <url>
+    <loc>https://mood.com.co/en/</loc>
+    <lastmod>2026-09-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.90</priority>
+    <xhtml:link rel="alternate" hreflang="en-CO" href="https://mood.com.co/en/"/>
+    <xhtml:link rel="alternate" hreflang="es-CO" href="https://mood.com.co/"/>
+    <xhtml:link rel="alternate" hreflang="es-PE" href="https://mood.pe/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mood.com.co/"/>
+  </url>
+</urlset>

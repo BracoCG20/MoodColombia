@@ -1,0 +1,510 @@
+---
+import { useTranslations, type Lang } from '../../i18n/utils';
+import CaseCard from './CaseCard.astro';
+import './Works.scss';
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+
+// CORRECCIÓN: El arreglo 'title' debe ser readonly para coincidir con el 'as const' de ui.ts
+interface CaseItem {
+  id: string;
+  title: readonly string[]; 
+  description: string;
+  tags: string;
+  link: string;
+  image: string;
+  video?: string;
+}
+
+const headerRegular = t('cases.header.regular') as string;
+const headerBold = t('cases.header.bold') as string;
+const btnText = t('cases.btn') as string;
+const itemsData = t('cases.items') as readonly CaseItem[];
+
+// Manejo seguro de imágenes con Vite Glob
+const imageFiles = import.meta.glob<{ default: { src: string } }>(
+  '../../assets/cases/*.{png,jpg,jpeg,webp}',
+  { eager: true }
+);
+
+const getImagePath = (filename: string) => {
+  const path = `../../assets/cases/${filename}`;
+  // QA: Retorna un string vacío si la imagen no existe para no romper la compilación
+  return imageFiles[path] ? imageFiles[path].default.src : '';
+};
+
+const col1 = [...itemsData];
+const col2 = [...itemsData.slice(2), ...itemsData.slice(0, 2)];
+
+// Duplicamos para el loop infinito
+const track1 = [...col1, ...col1];
+const track2 = [...col2, ...col2];
+---
+
+<section class='cases' aria-labelledby='cases-title' id={lang === 'es' ? 'trabajos' : 'works'} data-animate-section>
+  <header class='cases__header' data-animate-element>
+    <h2 id='cases-title' class='cases__heading'>
+      <span class='cases__heading-regular'>{headerRegular}</span>
+      <br />
+      <span class='cases__heading-bold'>{headerBold}</span>
+    </h2>
+  </header>
+
+  <div class='cases__carousel-wrapper'>
+    <div class='cases__columns'>
+      <!-- Columna 1 -->
+      <div class='cases__col cases__col--1' data-col-index='0'>
+        <div class='cases__track' data-carousel-track>
+          {
+            track1.map((item) => (
+              <CaseCard
+                title={item.title}
+                description={item.description}
+                tags={item.tags}
+                link={item.link}
+                imageSrc={getImagePath(item.image)}
+                video={item.video ?? ''}
+                btnText={btnText}
+              />
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Columna 2 -->
+      <div class='cases__col cases__col--2' data-col-index='1'>
+        <div class='cases__track' data-carousel-track>
+          {
+            track2.map((item) => (
+              <CaseCard
+                title={item.title}
+                description={item.description}
+                tags={item.tags}
+                link={item.link}
+                imageSrc={getImagePath(item.image)}
+                video={item.video ?? ''}
+                btnText={btnText}
+              />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODAL DE VIDEO -->
+<div class='video-modal' data-video-modal aria-hidden='true' role='dialog' aria-modal='true' aria-labelledby='modal-title'>
+  <div class='video-modal__backdrop' data-modal-backdrop></div>
+  <div class='video-modal__container' data-modal-container>
+    <div class='video-modal__header'>
+      <span class='video-modal__title' id='modal-title' data-modal-title></span>
+      <button class='video-modal__close' data-modal-close aria-label='Cerrar modal' type='button'>cerrar ×</button>
+    </div>
+
+    <div class='video-modal__media'>
+      <video class='video-modal__video' data-modal-video playsinline preload='metadata'></video>
+
+      <button class='video-modal__play-btn' data-modal-play aria-label='Reproducir / Pausar' type='button'>
+        <svg class='video-modal__play-icon' data-play-icon viewBox='0 0 24 24' fill='currentColor'>
+          <path d='M8 5v14l11-7z'></path>
+        </svg>
+        <svg class='video-modal__pause-icon' data-pause-icon viewBox='0 0 24 24' fill='currentColor' style='display:none'>
+          <path d='M6 19h4V5H6v14zm8-14v14h4V5h-4z'></path>
+        </svg>
+      </button>
+
+      <div class='video-modal__progress' data-modal-progress>
+        <div class='video-modal__progress-track' data-progress-track>
+          <div class='video-modal__progress-fill' data-progress-fill></div>
+          <div class='video-modal__progress-knob' data-progress-knob></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.addEventListener('astro:page-load', () => {
+    const section = document.querySelector('.cases');
+    if (!section) return;
+
+    let ctx = gsap.context(() => {
+      const headerElements = section.querySelectorAll('[data-animate-element]');
+      if (headerElements.length > 0) {
+        gsap.set(headerElements, { y: 30, opacity: 0 });
+        ScrollTrigger.create({
+          trigger: section,
+          start: 'top 80%',
+          once: true,
+          onEnter: () => gsap.to(headerElements, { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' })
+        });
+      }
+
+      const tracks = document.querySelectorAll('[data-carousel-track]');
+      const carouselWrapper = document.querySelector('.cases__carousel-wrapper');
+      const cards = document.querySelectorAll('[data-case-card]');
+      const col1 = document.querySelector('.cases__col--1') as HTMLElement;
+      const track1 = col1?.querySelector('.cases__track') as HTMLElement;
+
+      const isHoverable = window.matchMedia('(hover: hover)').matches;
+      const isTouch = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+      let carousels: gsap.core.Tween[] = [];
+      let activeCard: HTMLElement | null = null;
+      let isCardActive = false;
+      let touchMode: 'idle' | 'carousel' | 'page' = 'idle';
+      const SWIPE_THRESHOLD = 6;
+      let mobileTween: gsap.core.Tween | null = null;
+      let mobileDirection: 1 | -1 = 1;
+
+      const isMobileViewport = () => window.matchMedia('(max-width: 1023px)').matches;
+
+      let mm = gsap.matchMedia();
+
+      mm.add(
+        {
+          isMobile: '(max-width: 1023px)',
+          isDesktop: '(min-width: 1024px)',
+        },
+        (context) => {
+          const { isMobile, isDesktop } = context.conditions as any;
+
+          carousels.forEach((c) => c.kill());
+          carousels = [];
+          mobileTween?.kill();
+          mobileTween = null;
+
+          if (isDesktop) {
+            carousels = Array.from(tracks).map((track, index) => {
+              const isMovingUp = index % 2 !== 0;
+              return gsap.fromTo(track,
+                { yPercent: isMovingUp ? 0 : -50 },
+                { yPercent: isMovingUp ? -50 : 0, duration: 40, ease: 'none', repeat: -1 }
+              );
+            });
+          }
+
+          if (isMobile && track1) {
+            mobileTween = gsap.fromTo(track1,
+              { yPercent: 0 },
+              { yPercent: -50, duration: 40, ease: 'none', repeat: -1 }
+            );
+            mobileDirection = 1;
+            mobileTween.timeScale(mobileDirection);
+          }
+        }
+      );
+
+      // TOUCH LOGIC
+      if (col1 && track1) {
+        const BOUNDARY_RATIO = 0.04;
+        const FLIP_THRESHOLD = 8;
+        let gestureRefY = 0;
+        let releasedToPage = false;
+        let pageLastY = 0;
+
+        const getLoopHeight = () => track1.scrollHeight / 2;
+        const getRealPosition = () => {
+          const yPercent = (gsap.getProperty(track1, 'yPercent') as number) || 0;
+          return (-yPercent / 100) * track1.scrollHeight;
+        };
+
+        col1.addEventListener('touchstart', (e) => {
+            if (!isMobileViewport() || !mobileTween) return;
+            gestureRefY = e.touches[0].clientY;
+            releasedToPage = false;
+            pageLastY = gestureRefY;
+          }, { passive: true }
+        );
+
+        col1.addEventListener('touchmove', (e) => {
+            if (!isMobileViewport() || !mobileTween) return;
+            const currentY = e.touches[0].clientY;
+
+            if (releasedToPage) {
+              // Si fue liberado a la página, no prevenimos comportamiento default de touchmove
+              return; 
+            }
+
+            const deltaY = currentY - gestureRefY;
+            if (Math.abs(deltaY) < FLIP_THRESHOLD) return;
+
+            const requestedDirection: 1 | -1 = deltaY > 0 ? -1 : 1;
+
+            if (requestedDirection === mobileDirection) {
+              gestureRefY = currentY;
+              e.preventDefault(); // Seguro porque aquí controlamos el scroll nativamente
+              return;
+            }
+
+            const loopHeight = getLoopHeight();
+            const realPos = getRealPosition();
+            const boundary = loopHeight * BOUNDARY_RATIO;
+            const atStart = realPos <= boundary;
+            const atEnd = realPos >= loopHeight - boundary;
+
+            if ((requestedDirection === -1 && atStart) || (requestedDirection === 1 && atEnd)) {
+              releasedToPage = true;
+              pageLastY = currentY;
+              return;
+            }
+
+            mobileDirection = requestedDirection;
+            mobileTween.timeScale(mobileDirection);
+            gestureRefY = currentY;
+            e.preventDefault();
+          }, { passive: false } // QA: Importante mantener false si usaremos e.preventDefault()
+        );
+
+        col1.addEventListener('touchend', () => { releasedToPage = false; }, { passive: true });
+      }
+
+      // ACCORDION LOGIC
+      cards.forEach((card) => {
+        const track = card.closest('[data-carousel-track]') as HTMLElement;
+        const col = card.closest('[data-col-index]');
+        const colIndex = col ? parseInt(col.getAttribute('data-col-index') || '-1', 10) : -1;
+        const trigger = card.querySelector('[data-case-trigger]') as HTMLButtonElement;
+        const body = card.querySelector('[data-case-body]') as HTMLElement;
+        const img = card.querySelector('[data-case-img]') as HTMLElement;
+        const overlay = card.querySelector('[data-case-overlay]') as HTMLElement;
+
+        gsap.set(body, { height: 0, overflow: 'hidden' });
+
+        if (isHoverable) {
+          card.addEventListener('mouseenter', () => {
+            const isDesktop = window.innerWidth >= 1024;
+            if (isDesktop && colIndex >= 0 && colIndex < carousels.length) carousels[colIndex].pause();
+            if (card.classList.contains('is-active')) return;
+            gsap.to(img, { scale: 1.2, duration: 0.4, ease: 'power2.out' });
+            gsap.to(overlay, { opacity: 0.6, duration: 0.4, ease: 'power2.out' });
+          });
+
+          card.addEventListener('mouseleave', () => {
+            const isDesktop = window.innerWidth >= 1024;
+            if (card.classList.contains('is-active')) {
+              gsap.to(body, { height: 0, duration: 0.4, ease: 'power2.inOut' });
+              trigger.setAttribute('aria-expanded', 'false');
+              card.classList.remove('is-active');
+              activeCard = null;
+              isCardActive = false;
+              if (!isDesktop && mobileTween) mobileTween.play();
+              if (isDesktop) {
+                gsap.to(track, {
+                  y: 0, duration: 0.4, ease: 'power2.inOut',
+                  onComplete: () => {
+                    if (window.innerWidth >= 1024 && colIndex >= 0 && colIndex < carousels.length) carousels[colIndex].play();
+                  },
+                });
+              }
+            } else {
+              if (isDesktop && colIndex >= 0 && colIndex < carousels.length) carousels[colIndex].play();
+            }
+            gsap.to(img, { scale: 1, duration: 0.4, ease: 'power2.out' });
+            gsap.to(overlay, { opacity: 0, duration: 0.4, ease: 'power2.out' });
+          });
+        }
+
+        trigger.addEventListener('click', (e) => {
+          if (isTouch) e.stopPropagation();
+          const isDesktop = window.innerWidth >= 1024;
+          const isCurrentlyActive = activeCard === card;
+
+          if (isTouch && activeCard && !isCurrentlyActive) {
+            const activeBody = activeCard.querySelector('[data-case-body]');
+            const activeTrigger = activeCard.querySelector('[data-case-trigger]');
+            const activeTrack = activeCard.closest('[data-carousel-track]');
+            const activeCol = activeCard.closest('[data-col-index]');
+            const activeColIndex = activeCol ? parseInt(activeCol.getAttribute('data-col-index') || '-1', 10) : -1;
+
+            gsap.to(activeBody, { height: 0, duration: 0.4, ease: 'power2.inOut' });
+            activeTrigger?.setAttribute('aria-expanded', 'false');
+            activeCard.classList.remove('is-active');
+
+            if (isDesktop && activeTrack) {
+              gsap.to(activeTrack, {
+                y: 0, duration: 0.4, ease: 'power2.inOut',
+                onComplete: () => { if (activeColIndex >= 0 && activeColIndex < carousels.length) carousels[activeColIndex].play(); },
+              });
+            }
+          }
+
+          if (isCurrentlyActive) {
+            gsap.to(body, { height: 0, duration: 0.4, ease: 'power2.inOut' });
+            trigger.setAttribute('aria-expanded', 'false');
+            card.classList.remove('is-active');
+            activeCard = null;
+            isCardActive = false;
+            if (!isDesktop && mobileTween) mobileTween.play();
+
+            if (isDesktop) {
+              gsap.to(track, {
+                y: 0, duration: 0.4, ease: 'power2.inOut',
+                onComplete: () => { if (isTouch && colIndex >= 0 && colIndex < carousels.length) carousels[colIndex].play(); },
+              });
+            }
+          } else {
+            if (isDesktop && isTouch && colIndex >= 0 && colIndex < carousels.length) carousels[colIndex].pause();
+
+            gsap.to(body, { height: 'auto', duration: 0.4, ease: 'power2.inOut' });
+            trigger.setAttribute('aria-expanded', 'true');
+            card.classList.add('is-active');
+            activeCard = card as HTMLElement;
+            isCardActive = true;
+            if (!isDesktop && mobileTween) mobileTween.pause();
+
+            if (isDesktop && carouselWrapper) {
+              const wrapperRect = carouselWrapper.getBoundingClientRect();
+              const cardRect = card.getBoundingClientRect();
+              const wrapperCenter = wrapperRect.top + wrapperRect.height / 2;
+              const expandedCardCenter = cardRect.top + cardRect.height / 2 + body.scrollHeight / 2;
+              const shiftY = wrapperCenter - expandedCardCenter;
+              gsap.to(track, { y: `+=${shiftY}`, duration: 0.4, ease: 'power2.inOut' });
+            }
+
+            gsap.to(img, { scale: 1, duration: 0.4, ease: 'power2.out' });
+            gsap.to(overlay, { opacity: 0, duration: 0.4, ease: 'power2.out' });
+          }
+        });
+      });
+
+      // MODAL LOGIC
+      const DEMO_VIDEO = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+      const videoModal = document.querySelector('[data-video-modal]') as HTMLElement;
+      const modalBackdrop = document.querySelector('[data-modal-backdrop]') as HTMLElement;
+      const modalContainer = document.querySelector('[data-modal-container]') as HTMLElement;
+      const modalTitleEl = document.querySelector('[data-modal-title]') as HTMLElement;
+      const modalVideo = document.querySelector('[data-modal-video]') as HTMLVideoElement;
+      const modalClose = document.querySelector('[data-modal-close]') as HTMLButtonElement;
+      const modalPlayBtn = document.querySelector('[data-modal-play]') as HTMLButtonElement;
+      const playIcon = document.querySelector('[data-play-icon]') as SVGElement;
+      const pauseIcon = document.querySelector('[data-pause-icon]') as SVGElement;
+      const progressFill = document.querySelector('[data-progress-fill]') as HTMLElement;
+      const progressKnob = document.querySelector('[data-progress-knob]') as HTMLElement;
+      const progressTrack = document.querySelector('[data-progress-track]') as HTMLElement;
+
+      if (!videoModal || !modalVideo) return;
+
+      let isModalOpen = false;
+      let isDragging = false;
+      let lastFocusedElement: HTMLElement | null = null; // QA: Guarda el foco
+
+      const updatePlayIcons = (paused: boolean) => {
+        if (paused) { playIcon.style.display = 'block'; pauseIcon.style.display = 'none'; } 
+        else { playIcon.style.display = 'none'; pauseIcon.style.display = 'block'; }
+      };
+
+      const updateProgress = () => {
+        if (!modalVideo.duration) return;
+        const pct = (modalVideo.currentTime / modalVideo.duration) * 100;
+        gsap.set(progressFill, { width: `${pct}%` });
+        gsap.set(progressKnob, { left: `${pct}%` });
+      };
+
+      const seekFromEvent = (e: MouseEvent | Touch) => {
+        const rect = progressTrack.getBoundingClientRect();
+        const clientX = 'clientX' in e ? e.clientX : (e as Touch).clientX;
+        const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+        modalVideo.currentTime = ratio * modalVideo.duration;
+        updateProgress();
+      };
+
+      const openModal = (title: string, videoSrc: string, triggerBtn: HTMLElement) => {
+        isModalOpen = true;
+        lastFocusedElement = triggerBtn; // A11y
+        modalTitleEl.textContent = title;
+        modalVideo.src = videoSrc || DEMO_VIDEO;
+        modalVideo.load();
+        modalVideo.pause();
+        updatePlayIcons(true);
+        gsap.set(progressFill, { width: '0%' });
+        gsap.set(progressKnob, { left: '0%' });
+
+        videoModal.setAttribute('aria-hidden', 'false');
+        videoModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        gsap.fromTo(modalBackdrop, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power2.out' });
+        gsap.fromTo(modalContainer, 
+          { opacity: 0, scale: 0.85, y: 30 }, 
+          { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: 'back.out(1.4)', delay: 0.05, 
+            onComplete: () => modalClose.focus() // A11y: Pone el foco en el botón cerrar
+          }
+        );
+      };
+
+      const closeModal = () => {
+        if (!isModalOpen) return;
+        gsap.to(modalContainer, { opacity: 0, scale: 0.9, y: 20, duration: 0.3, ease: 'power2.in' });
+        gsap.to(modalBackdrop, {
+          opacity: 0, duration: 0.3, ease: 'power2.in',
+          onComplete: () => {
+            isModalOpen = false;
+            videoModal.setAttribute('aria-hidden', 'true');
+            videoModal.style.display = 'none';
+            modalVideo.pause();
+            modalVideo.src = '';
+            document.body.style.overflow = '';
+            updatePlayIcons(true);
+            if(lastFocusedElement) lastFocusedElement.focus(); // A11y: Devuelve el foco
+          },
+        });
+      };
+
+      document.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest('[data-ver-caso]') as HTMLElement | null;
+        if (!btn) return;
+        e.stopPropagation();
+        const title = btn.getAttribute('data-title') ?? '';
+        const videoSrc = btn.getAttribute('data-video') ?? '';
+        openModal(title, videoSrc, btn);
+      });
+
+      modalClose.addEventListener('click', closeModal);
+      modalBackdrop.addEventListener('click', closeModal);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isModalOpen) closeModal(); });
+
+      const togglePlay = () => {
+        if (modalVideo.paused) {
+          modalVideo.play();
+          updatePlayIcons(false);
+          gsap.fromTo(modalPlayBtn, { opacity: 1, scale: 1.2 }, { opacity: 0, scale: 0.8, duration: 0.5, ease: 'power2.in', delay: 0.5 });
+        } else {
+          modalVideo.pause();
+          updatePlayIcons(true);
+          gsap.fromTo(modalPlayBtn, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(1.4)' });
+        }
+      };
+
+      modalPlayBtn.addEventListener('click', togglePlay);
+      modalVideo.addEventListener('click', togglePlay);
+
+      modalVideo.addEventListener('ended', () => {
+        updatePlayIcons(true);
+        gsap.fromTo(modalPlayBtn, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(1.4)' });
+      });
+
+      modalVideo.addEventListener('timeupdate', updateProgress);
+
+      progressTrack.addEventListener('click', seekFromEvent);
+      progressTrack.addEventListener('mousedown', (e) => { isDragging = true; seekFromEvent(e); });
+      document.addEventListener('mousemove', (e) => { if (isDragging) seekFromEvent(e); });
+      document.addEventListener('mouseup', () => { isDragging = false; });
+      progressTrack.addEventListener('touchstart', (e) => { isDragging = true; seekFromEvent(e.touches[0]); });
+      document.addEventListener('touchmove', (e) => { if (isDragging) seekFromEvent(e.touches[0]); });
+      document.addEventListener('touchend', () => { isDragging = false; });
+
+    }, section);
+
+    document.addEventListener('astro:before-preparation', () => {
+      ctx.revert();
+    }, { once: true });
+  });
+</script>

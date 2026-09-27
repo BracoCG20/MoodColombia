@@ -1,0 +1,231 @@
+---
+import { useTranslations, getTranslatedRoute, type Lang } from '../../i18n/utils';
+import './Header.scss';
+
+const lang = (Astro.currentLocale || 'es') as Lang;
+const t = useTranslations(lang);
+
+// Definimos los enlaces estructurados para iterarlos
+const navLinks = [
+  { label: t('nav.nosotros'), route: '#nosotros' as const },
+  { label: t('nav.timeline'), route: '#timeline' as const },
+  { label: t('nav.trabajos'), route: '#trabajos' as const },
+  { label: t('nav.marcas'), route: '#marcas' as const },
+  { label: t('nav.contacto'), route: '#contacto' as const },
+  { label: t('nav.cta'), route: '#cta' as const },
+];
+
+const languages = [
+  { code: 'es', label: 'Es', url: '/' },
+  { code: 'en', label: 'En', url: '/en/' }
+];
+---
+
+<header class='header' data-header>
+  <div class='header__container'>
+    <a href={lang === 'es' ? '/' : '/en/'} class='header__brand' aria-label='Volver al inicio'>
+      <img src='/logo_header.webp' alt='Moodco' class='header__logo' />
+    </a>
+
+    <p class='header__tagline'>{t('header.tagline')}</p>
+
+    <button
+      class='header__toggle'
+      data-menu-toggle
+      aria-label='Abrir menú'
+      aria-expanded='false'
+    >
+      <svg
+        xmlns='http://www.w3.org/2000/svg'
+        width='1em'
+        height='1em'
+        viewBox='0 0 24 24'
+        class='header__icon'
+        data-menu-icon
+      >
+        <path d='M0 0h24v24H0z' fill='none'></path>
+        <path
+          fill='none'
+          stroke='currentColor'
+          stroke-linecap='round'
+          stroke-linejoin='round'
+          stroke-width='1.5'
+          d='M4 8.5h16m-16 7h16'
+        ></path>
+      </svg>
+    </button>
+  </div>
+
+  <nav class='header__menu' data-menu aria-hidden='true'>
+    <div class='header__menu-inner'>
+      <ul class='header__nav'>
+        {
+          navLinks.map((link) => (
+            <li class='header__nav-item' data-nav-item>
+              <a
+                href={getTranslatedRoute(link.route, lang)}
+                class='header__nav-link'
+                data-nav-link
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      
+      <div class='header__lang' data-lang-selector>
+        <div class='header__lang-bubble' data-lang-bubble></div>
+        {
+          languages.map((l) => (
+            <button
+              class={`header__lang-btn ${lang === l.code ? 'is-active' : ''}`}
+              data-lang-btn
+              data-target-url={l.url}
+            >
+              {l.label}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </nav>
+</header>
+
+<script>
+  import gsap from 'gsap';
+  // Importamos navigate para usar transiciones de cliente nativas de Astro
+  import { navigate } from 'astro:transitions/client';
+
+  document.addEventListener('astro:page-load', () => {
+    const header = document.querySelector('[data-header]') as HTMLElement;
+    if (!header) return;
+
+    let ctx = gsap.context(() => {
+      const toggleBtn = document.querySelector('[data-menu-toggle]') as HTMLButtonElement;
+      const menuIcon = document.querySelector('[data-menu-icon]') as HTMLElement;
+      const menu = document.querySelector('[data-menu]') as HTMLElement;
+      const navItems = document.querySelectorAll('[data-nav-item]');
+      const navLinks = document.querySelectorAll('[data-nav-link]');
+      const langSelector = document.querySelector('[data-lang-selector]');
+      const langBtns = document.querySelectorAll('[data-lang-btn]');
+      const bubble = document.querySelector('[data-lang-bubble]') as HTMLElement;
+
+      let isMenuOpen = false;
+
+      gsap.set(menu, { autoAlpha: 0, clipPath: 'inset(0 0 100% 0)' });
+      gsap.set(navItems, { y: 30, opacity: 0 });
+      gsap.set(langSelector, { y: 20, opacity: 0 });
+
+      const menuTl = gsap.timeline({
+        paused: true,
+        defaults: { ease: 'power3.inOut' },
+      });
+
+      menuTl
+        .to(menu, { autoAlpha: 1, clipPath: 'inset(0 0 0% 0)', duration: 0.6 })
+        .to(navItems, { y: 0, opacity: 1, duration: 0.5, stagger: 0.05, ease: 'power2.out' }, '-=0.3')
+        .to(langSelector, { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }, '-=0.4');
+
+      const toggleMenu = () => {
+        isMenuOpen = !isMenuOpen;
+        toggleBtn.setAttribute('aria-expanded', isMenuOpen.toString());
+        
+        menu.setAttribute('aria-hidden', (!isMenuOpen).toString());
+
+        if (isMenuOpen) {
+          menuTl.play();
+          header.classList.add('is-open');
+          gsap.to(menuIcon, { rotation: 90, scale: 0.8, duration: 0.4, ease: 'power2.inOut' });
+          document.body.style.overflow = 'hidden';
+        } else {
+          menuTl.reverse();
+          header.classList.remove('is-open');
+          gsap.to(menuIcon, { rotation: 0, scale: 1, duration: 0.4, ease: 'power2.inOut' });
+          document.body.style.overflow = '';
+        }
+      };
+
+      toggleBtn.addEventListener('click', toggleMenu);
+
+      navLinks.forEach((link) => {
+        link.addEventListener('mouseenter', () => {
+          gsap.to(link, { x: 10, color: '#99ff99', duration: 0.3, ease: 'power2.out' });
+        });
+        
+        link.addEventListener('mouseleave', () => {
+          gsap.to(link, { x: 0, color: '#FFFFFF', duration: 0.3, ease: 'power2.out' });
+        });
+
+        link.addEventListener('click', (e) => {
+          const href = link.getAttribute('href');
+          if (href && href.includes('#')) {
+            e.preventDefault();
+            toggleMenu();
+            const targetId = href.split('#')[1];
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+              setTimeout(() => targetEl.scrollIntoView({ behavior: 'smooth' }), 400);
+            }
+          }
+        });
+      });
+
+      const initBubble = () => {
+        const activeBtn = Array.from(langBtns).find((btn) => btn.classList.contains('is-active')) as HTMLElement;
+        if (activeBtn && bubble) {
+          gsap.set(bubble, { left: activeBtn.offsetLeft, width: activeBtn.offsetWidth });
+        }
+      };
+
+      window.addEventListener('resize', initBubble);
+      setTimeout(initBubble, 50);
+
+      langBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (btn.classList.contains('is-active')) return;
+
+          langBtns.forEach((b) => {
+            b.classList.remove('is-active');
+            gsap.to(b, { color: '#FFFFFF', duration: 0.3 });
+          });
+
+          btn.classList.add('is-active');
+          gsap.to(btn, { color: '#000000', duration: 0.3, ease: 'power2.out' });
+
+          if (bubble) {
+            const htmlBtn = btn as HTMLElement;
+            const targetLeft = htmlBtn.offsetLeft;
+            const targetWidth = htmlBtn.offsetWidth;
+            const currentLeft = gsap.getProperty(bubble, 'left') as number;
+            const currentWidth = gsap.getProperty(bubble, 'width') as number;
+            const isMovingRight = targetLeft > currentLeft;
+
+            gsap.killTweensOf(bubble);
+            const tl = gsap.timeline({
+              onComplete: () => {
+                const targetUrl = htmlBtn.getAttribute('data-target-url');
+                if (targetUrl) {
+                  // NUEVO: Transición SPA suave usando el router de Astro
+                  navigate(targetUrl);
+                }
+              }
+            });
+
+            if (isMovingRight) {
+              tl.to(bubble, { width: targetLeft + targetWidth - currentLeft, scaleY: 0.7, borderRadius: '16px', duration: 0.2, ease: 'power2.in' })
+                .to(bubble, { left: targetLeft, width: targetWidth, scaleY: 1, borderRadius: '8px', duration: 0.45, ease: 'elastic.out(1, 0.7)' });
+            } else {
+              tl.to(bubble, { left: targetLeft, width: (currentLeft + currentWidth) - targetLeft, scaleY: 0.7, borderRadius: '16px', duration: 0.2, ease: 'power2.in' })
+                .to(bubble, { width: targetWidth, scaleY: 1, borderRadius: '8px', duration: 0.45, ease: 'elastic.out(1, 0.7)' });
+            }
+          }
+        });
+      });
+    }, header);
+
+    document.addEventListener('astro:before-preparation', () => {
+      ctx.revert();
+    }, { once: true });
+  });
+</script>

@@ -1,0 +1,115 @@
+@use "../../styles/variables" as *;
+@use "../../styles/breakpoints" as *;
+
+.about {
+	background-color: $white;
+	padding: 4.5rem 0.6rem;
+	width: 100%;
+
+	@include tablet {
+		padding: 5rem 4rem;
+	}
+	@include maxDesktop {
+		padding: 8rem 0rem;
+	}
+
+	&__container {
+		max-width: 1200px;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 3rem;
+
+		@include maxDesktop {
+			gap: 5rem;
+		}
+	}
+
+	&__grid {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		row-gap: 0.5rem;
+		column-gap: 1rem;
+
+		@include tablet {
+			column-gap: 3rem;
+		}
+	}
+
+	&__item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		flex: 0 1 auto;
+	}
+
+	&__divider {
+		width: 2px;
+		height: 60px;
+		background-color: $black;
+		flex-shrink: 0;
+
+		&--desktop-only {
+			display: none;
+
+			@include desktop {
+				display: block;
+			}
+		}
+	}
+
+	&__break {
+		flex-basis: 100%;
+		height: 0;
+
+		@include desktop {
+			display: none;
+		}
+	}
+
+	&__value-wrapper {
+		// Variable corregida a la oficial de la paleta
+		color: $color-green-light;
+		font-family: $font-stat;
+		font-size: clamp(2rem, 6vw, 3rem);
+		line-height: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		text-transform: uppercase;
+
+		@include maxDesktop {
+			font-size: 3.5rem;
+		}
+	}
+
+	&__label {
+		color: $black;
+		font-family: $font-compressed;
+		font-size: clamp(1.2rem, 3vw, 1.8rem);
+		line-height: 1.2;
+		text-transform: uppercase;
+		margin: 0;
+		max-width: 150px;
+
+		@include desktop {
+			max-width: 350px;
+		}
+		@include maxDesktop {
+			font-size: 2.5rem;
+		}
+	}
+
+	&__paragraph {
+		font-family: $font-primary;
+		font-size: clamp(1rem, 2vw, 1.8rem);
+		line-height: 1.5;
+		color: $black;
+		text-align: center;
+		max-width: 1100px;
+		margin: 0 auto;
+	}
+}

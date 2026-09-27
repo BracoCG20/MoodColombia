@@ -1,0 +1,40 @@
+// Breakpoints
+$bp-mobile-sm: 375px;
+$bp-mobile-lg: 440px;
+$bp-tablet: 768px;
+$bp-desktop: 1024px;
+$bp-maxDesktop: 1440px;
+
+// ==========================================
+// Mixins para Media Queries (Mobile First)
+// ==========================================
+
+@mixin mobileSm {
+	@media (min-width: #{$bp-mobile-sm}) {
+		@content;
+	}
+}
+
+@mixin mobileLg {
+	@media (min-width: #{$bp-mobile-lg}) {
+		@content;
+	}
+}
+
+@mixin tablet {
+	@media (min-width: #{$bp-tablet}) {
+		@content;
+	}
+}
+
+@mixin desktop {
+	@media (min-width: #{$bp-desktop}) {
+		@content;
+	}
+}
+
+@mixin maxDesktop {
+	@media (min-width: #{$bp-maxDesktop}) {
+		@content;
+	}
+}

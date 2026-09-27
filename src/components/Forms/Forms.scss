@@ -1,0 +1,280 @@
+@use "../../styles/variables" as *;
+@use "../../styles/breakpoints" as *;
+
+.forms-section {
+	width: 100%;
+	position: relative;
+	// QA: Aseguramos que el contenedor no colapse durante la animación
+	min-height: 80vh;
+	background-color: $black;
+
+	&__wrapper {
+		display: none;
+		width: 100%;
+		min-height: 80vh;
+		padding: 3rem 2rem;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+
+		// Preparación para la animación GSAP
+		opacity: 0;
+		position: absolute;
+		top: 0;
+		left: 0;
+
+		&.is-active {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			opacity: 1;
+			position: relative; // Retoma su posición en el flujo
+
+			@include desktop {
+				justify-content: center;
+				padding: 0;
+			}
+		}
+
+		&#wrapper-contacto {
+			background-position: right;
+			background-image: url("/fondoM_form1.webp");
+			@include desktop {
+				background-image: url("/fondo_form1.webp");
+			}
+		}
+
+		&#wrapper-trabaja {
+			background-image: url("/fondoM_form2.webp");
+
+			@include desktop {
+				background-image: url("/fondo_form2.webp");
+
+				.forms-section__content {
+					flex-direction: row;
+					justify-content: center;
+					align-items: start;
+					max-width: 1100px;
+					gap: 2rem;
+				}
+
+				.forms-section__header {
+					flex: 1;
+					max-width: 400px;
+					text-align: left;
+				}
+
+				.forms-section__title {
+					display: flex;
+					flex-direction: column;
+					font-size: 4.5rem;
+					line-height: 1.05;
+				}
+
+				.form {
+					flex: 1;
+					max-width: 450px;
+					width: 100%;
+				}
+			}
+		}
+	}
+
+	&__content {
+		width: 100%;
+		max-width: 600px;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+		@include tablet {
+			padding: 2rem 0;
+		}
+		@include desktop {
+			max-width: 800px;
+			padding: 4rem 0;
+		}
+	}
+
+	&__header {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		text-align: center;
+		color: $white;
+		@include desktop {
+			text-align: start;
+			max-width: 650px;
+		}
+	}
+
+	&__title {
+		display: flex;
+		justify-content: center;
+		gap: 0 0.2rem;
+		flex-wrap: wrap;
+		font-family: $font-secondary;
+		text-transform: uppercase;
+		font-size: 1.75rem;
+		line-height: 1;
+		margin: 0;
+
+		@include tablet {
+			font-size: 3rem;
+			justify-content: start;
+		}
+	}
+
+	&__title-regular {
+		font-weight: 400;
+	}
+	&__title-bold {
+		font-weight: 700;
+		@include desktop {
+			padding-left: 10px;
+		}
+	}
+
+	&__subtitle {
+		font-family: $font-primary;
+		font-size: 1.125rem;
+		@include desktop {
+			font-size: 1.5rem;
+		}
+	}
+}
+
+// Bloque Formulario
+.form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.7rem;
+
+	@include desktop {
+		align-items: flex-start;
+		max-width: 650px;
+	}
+
+	&__group {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+
+		&--file {
+			align-items: flex-start;
+		}
+	}
+
+	&__label {
+		color: $white;
+		font-size: 1rem;
+		font-family: $font-primary;
+		@include desktop {
+			font-size: 1.2rem;
+		}
+
+		&--file {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			cursor: pointer;
+			border-bottom: 1px solid $white;
+			padding-bottom: 0.25rem;
+
+			svg {
+				width: 18px;
+				height: 18px;
+			}
+		}
+	}
+
+	&__input {
+		width: 100%;
+		padding: 0.5rem 1rem;
+		border: none;
+		border-radius: 10px;
+		background-color: $white;
+		color: $black;
+		font-family: $font-primary;
+		font-size: 1rem;
+
+		&:focus {
+			background-color: $white;
+			outline: none;
+		}
+	}
+
+	&__input-file {
+		display: none;
+	}
+
+	&__actions {
+		display: flex;
+		justify-content: flex-start;
+		margin-top: 1rem;
+	}
+
+	&__btn {
+		padding: 1.2rem 2rem;
+		border-radius: 8px;
+		font-family: $font-secondary;
+		font-weight: 700;
+		text-transform: uppercase;
+		font-size: 1.25rem;
+		line-height: 110%;
+		cursor: pointer;
+		border: none;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		transition: opacity 0.2s ease;
+		will-change: transform, opacity;
+
+		&.is-hidden {
+			display: none;
+		}
+
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+
+		&:hover:not(:disabled) {
+			opacity: 0.8;
+		}
+
+		&:disabled {
+			cursor: not-allowed;
+			opacity: 0.6;
+		}
+
+		&--submit {
+			background-color: $white;
+			color: $black;
+		}
+
+		&--success {
+			background-color: $color-green-light;
+			color: $black;
+			pointer-events: none;
+		}
+	}
+
+	&__input.is-invalid {
+		border: 1px solid #ff4d4d;
+		background-color: rgba(255, 255, 255, 0.95);
+	}
+
+	&__error {
+		color: #ff4d4d;
+		font-size: 0.85rem;
+		font-family: $font-primary;
+		margin-top: -0.25rem;
+		min-height: 1rem;
+		display: block;
+		text-align: left;
+		width: 100%;
+		will-change: opacity, transform;
+	}
+}

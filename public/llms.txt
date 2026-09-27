@@ -1,0 +1,18 @@
+# MoodCo - Agencia Creativa Digital (Sede Colombia)
+
+## Sobre Nosotros
+MoodCo es la sede oficial en Colombia de Mood Agencia (cuya sede matriz se encuentra en Perú - mood.pe). Somos el socio estratégico que transforma creatividad en resultados reales, legibles y sostenibles en el tiempo. Desarrollamos plataformas de marca, campañas, contenidos y ecosistemas digitales orientados a KPIs.
+
+## Tecnologías y Arquitectura del Sitio
+- **Framework Principal:** Astro (con SSR, ViewTransitions y enrutamiento SPA).
+- **Animaciones:** GSAP (ScrollTrigger) y Lenis para Smooth Scroll.
+- **Estilos:** SCSS (Sass) siguiendo metodología BEM y Responsive Design (Mobile-First).
+- **Backend Integrado:** Node.js v22+ en Astro API (`/api/forms/submit.ts`).
+- **Seguridad y Validación:** Zod para esquemas estrictos y validación Frontend/Backend contra XSS/Spam.
+- **Servicio de Correos:** Nodemailer con plantillas HTML personalizadas conectadas vía SMTP.
+- **Idiomas (i18n):** Soporte nativo para Español (`/`) e Inglés (`/en/`), manejado por diccionarios globales en `src/i18n/ui.ts`.
+
+## Información de Contacto (SEO Local)
+- **Dominio Oficial:** https://mood.com.co
+- **Sede Principal:** Bogotá, Colombia.
+- **Contacto:** desguerra@mood.com.co / +57 310 561 1021
