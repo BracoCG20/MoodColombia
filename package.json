@@ -12,6 +12,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/node": "^11.1.6",
     "@lucide/astro": "^1.48.0",
     "astro": "^7.3.5",
     "gsap": "^3.15.0",
@@ -24,7 +25,9 @@
     "esbuild": true
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
     "@types/node": "^26.6.3",
-    "@types/nodemailer": "^8.0.2"
+    "@types/nodemailer": "^8.0.2",
+    "typescript": "^6.0.3"
   }
 }
